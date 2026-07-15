@@ -31,6 +31,8 @@ export const useWebRTC = (roomId, userId, displayName) => {
 
   // 1. Initialize Encryption Key and Media Streams
   useEffect(() => {
+    if (!roomId || !userId) return;
+
     let isCancelled = false;
 
     const initializeCall = async () => {
