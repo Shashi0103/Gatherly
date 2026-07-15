@@ -246,7 +246,7 @@ export default function MeetingRoom() {
       </header>
 
       {/* Dynamic Video Feeds Layout */}
-      <div className="flex-1 flex p-6 min-h-0 w-full justify-center items-center overflow-hidden">
+      <div className="flex-1 flex p-6 pb-24 min-h-0 w-full justify-center items-center overflow-hidden relative">
         {!pinnedUser ? (
           /* Standard Grid Layout */
           <div className={`grid gap-5 w-full h-full justify-center content-center ${getGridClass()}`}>
@@ -340,122 +340,122 @@ export default function MeetingRoom() {
             </div>
           </div>
         )}
-      </div>
 
-      {/* Floating Control Bar */}
-      <footer className="z-10 pt-2 pb-1 flex items-center justify-center relative">
-        <div className="glass-panel py-3 px-6 bg-bg-secondary/60 flex items-center justify-center gap-4 border border-white/10 rounded-2xl shadow-xl">
-          <button
-            onClick={toggleMute}
-            className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all ${
-              isMuted 
-                ? 'bg-red-600/10 border-red-500/20 text-red-400 hover:bg-red-600/20' 
-                : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
-            }`}
-            title={isMuted ? 'Unmute microphone' : 'Mute microphone'}
-          >
-            {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-          </button>
-
-          <button
-            onClick={toggleCamera}
-            className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all ${
-              isCameraOff 
-                ? 'bg-red-600/10 border-red-500/20 text-red-400 hover:bg-red-600/20' 
-                : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
-            }`}
-            title={isCameraOff ? 'Turn on camera' : 'Turn off camera'}
-          >
-            {isCameraOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
-          </button>
-
-          <button
-            onClick={toggleScreenShare}
-            className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all ${
-              isScreenSharing 
-                ? 'bg-greenAccent/15 border-greenAccent/30 text-greenAccent-light hover:bg-greenAccent/20' 
-                : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
-            }`}
-            title={isScreenSharing ? 'Stop screen sharing' : 'Share your screen'}
-          >
-            <Monitor className="w-5 h-5" />
-          </button>
-
-          <span className="w-[1px] h-6 bg-borderCol"></span>
-
-          {!isRecording ? (
+        {/* Floating Control Bar Overlayed */}
+        <footer className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center">
+          <div className="glass-panel py-3 px-6 bg-black/60 backdrop-blur-md flex items-center justify-center gap-4 border border-white/10 rounded-2xl shadow-2xl">
             <button
-              onClick={startRecording}
-              className="w-11 h-11 rounded-xl bg-surface-glass border border-borderCol hover:border-red-500/30 text-textCol-secondary hover:text-red-400 flex items-center justify-center transition-all"
-              title="Record Meeting"
+              onClick={toggleMute}
+              className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all ${
+                isMuted 
+                  ? 'bg-red-600/10 border-red-500/20 text-red-400 hover:bg-red-600/20' 
+                  : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
+              }`}
+              title={isMuted ? 'Unmute microphone' : 'Mute microphone'}
             >
-              <Radio className="w-5 h-5" />
+              {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
             </button>
-          ) : (
-            <div className="flex gap-2 bg-black/30 p-1 rounded-xl border border-borderCol/55">
-              {isPaused ? (
-                <button
-                  onClick={resumeRecording}
-                  className="w-9 h-9 rounded-lg bg-surface-glass text-greenAccent hover:text-greenAccent-light flex items-center justify-center"
-                  title="Resume Recording"
-                >
-                  <Play className="w-4 h-4 fill-greenAccent" />
-                </button>
-              ) : (
-                <button
-                  onClick={pauseRecording}
-                  className="w-9 h-9 rounded-lg bg-surface-glass text-yellow-500 hover:text-yellow-400 flex items-center justify-center"
-                  title="Pause Recording"
-                >
-                  <Pause className="w-4 h-4" />
-                </button>
-              )}
 
+            <button
+              onClick={toggleCamera}
+              className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all ${
+                isCameraOff 
+                  ? 'bg-red-600/10 border-red-500/20 text-red-400 hover:bg-red-600/20' 
+                  : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
+              }`}
+              title={isCameraOff ? 'Turn on camera' : 'Turn off camera'}
+            >
+              {isCameraOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+            </button>
+
+            <button
+              onClick={toggleScreenShare}
+              className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all ${
+                isScreenSharing 
+                  ? 'bg-greenAccent/15 border-greenAccent/30 text-greenAccent-light hover:bg-greenAccent/20' 
+                  : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
+              }`}
+              title={isScreenSharing ? 'Stop screen sharing' : 'Share your screen'}
+            >
+              <Monitor className="w-5 h-5" />
+            </button>
+
+            <span className="w-[1px] h-6 bg-borderCol"></span>
+
+            {!isRecording ? (
               <button
-                onClick={stopRecording}
-                className="w-9 h-9 rounded-lg bg-red-600 hover:bg-red-700 text-white flex items-center justify-center"
-                title="Stop & Save Recording"
+                onClick={startRecording}
+                className="w-11 h-11 rounded-xl bg-surface-glass border border-borderCol hover:border-red-500/30 text-textCol-secondary hover:text-red-400 flex items-center justify-center transition-all"
+                title="Record Meeting"
               >
-                <Square className="w-4 h-4 fill-white text-white" />
+                <Radio className="w-5 h-5" />
               </button>
-            </div>
-          )}
+            ) : (
+              <div className="flex gap-2 bg-black/30 p-1 rounded-xl border border-borderCol/55">
+                {isPaused ? (
+                  <button
+                    onClick={resumeRecording}
+                    className="w-9 h-9 rounded-lg bg-surface-glass text-greenAccent hover:text-greenAccent-light flex items-center justify-center"
+                    title="Resume Recording"
+                  >
+                    <Play className="w-4 h-4 fill-greenAccent" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={pauseRecording}
+                    className="w-9 h-9 rounded-lg bg-surface-glass text-yellow-500 hover:text-yellow-400 flex items-center justify-center"
+                    title="Pause Recording"
+                  >
+                    <Pause className="w-4 h-4" />
+                  </button>
+                )}
 
-          <button
-            onClick={() => setIsChatOpen(!isChatOpen)}
-            className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all relative ${
-              isChatOpen 
-                ? 'bg-blueAccent/15 border-blueAccent/30 text-blueAccent-light' 
-                : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
-            }`}
-            title="Chat Drawer"
-          >
-            <MessageSquare className="w-5 h-5" />
-            <AnimatePresence>
-              {unreadChatCount > 0 && (
-                <motion.span
-                  key="chat-badge"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                  className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 bg-blueAccent border-2 border-bg-primary text-white rounded-full flex items-center justify-center text-[9px] font-bold px-1.5 shadow-md pointer-events-none"
+                <button
+                  onClick={stopRecording}
+                  className="w-9 h-9 rounded-lg bg-red-600 hover:bg-red-700 text-white flex items-center justify-center"
+                  title="Stop & Save Recording"
                 >
-                  {unreadChatCount}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
+                  <Square className="w-4 h-4 fill-white text-white" />
+                </button>
+              </div>
+            )}
 
-          <button
-            onClick={handleLeave}
-            className="w-11 h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-all shadow-lg shadow-red-600/15"
-            title="Leave Call"
-          >
-            <PhoneOff className="w-5 h-5" />
-          </button>
-        </div>
-      </footer>
+            <button
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all relative ${
+                isChatOpen 
+                  ? 'bg-blueAccent/15 border-blueAccent/30 text-blueAccent-light' 
+                  : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
+              }`}
+              title="Chat Drawer"
+            >
+              <MessageSquare className="w-5 h-5" />
+              <AnimatePresence>
+                {unreadChatCount > 0 && (
+                  <motion.span
+                    key="chat-badge"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                    className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 bg-blueAccent border-2 border-bg-primary text-white rounded-full flex items-center justify-center text-[9px] font-bold px-1.5 shadow-md pointer-events-none"
+                  >
+                    {unreadChatCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+
+            <button
+              onClick={handleLeave}
+              className="w-11 h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-all shadow-lg shadow-red-600/15"
+              title="Leave Call"
+            >
+              <PhoneOff className="w-5 h-5" />
+            </button>
+          </div>
+        </footer>
+      </div>
 
       {/* Right sliding Chat Panel Drawer */}
       <ChatDrawer
