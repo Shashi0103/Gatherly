@@ -90,6 +90,18 @@ router.get('/link/:link', protect, async (req, res) => {
     if (!meeting) {
       return res.status(404).json({ message: 'Meeting not found' });
     }
+
+    // Auto-end instant meetings after 1.5 hours (90 minutes)
+    const isInstant = meeting.title?.startsWith('Instant Meeting');
+    if (isInstant) {
+      const elapsedMs = Date.now() - new Date(meeting.scheduledAt).getTime();
+      const elapsedMinutes = elapsedMs / (1000 * 60);
+      if (elapsedMinutes >= 90) {
+        meeting.status = 'past';
+        await meeting.save();
+        return res.status(403).json({ message: 'This instant meeting room has expired (maximum limit 1.5 hours).' });
+      }
+    }
     
     // Add user to participants if they are not already there
     if (!meeting.participants.includes(req.user.uid)) {

@@ -159,16 +159,37 @@ export default function MeetingRoom() {
 
   // Fetch meeting metadata first
   useEffect(() => {
+    let timeoutId;
     const checkMeeting = async () => {
       try {
         const response = await axios.get(`/api/meetings/link/${roomId}`);
         setMeetingTitle(response.data.title);
+        
+        // Auto-end instant meetings after 1.5 hours (90 minutes)
+        const isInstant = response.data.title?.startsWith('Instant Meeting');
+        if (isInstant) {
+          const limitMs = 90 * 60 * 1000; // 90 minutes
+          const elapsedMs = Date.now() - new Date(response.data.scheduledAt).getTime();
+          const remainingMs = limitMs - elapsedMs;
+          
+          if (remainingMs <= 0) {
+            setMeetingError('This instant meeting has reached the 1.5-hour limit and ended.');
+          } else {
+            timeoutId = setTimeout(() => {
+              setMeetingError('This instant meeting has reached the 1.5-hour limit and ended.');
+            }, remainingMs);
+          }
+        }
       } catch (err) {
         console.error('Failed to join meeting:', err);
-        setMeetingError('Meeting code is invalid or could not be found.');
+        setMeetingError(err.response?.data?.message || 'Meeting code is invalid or could not be found.');
       }
     };
     checkMeeting();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [roomId]);
 
 

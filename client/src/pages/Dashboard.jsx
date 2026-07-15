@@ -63,7 +63,7 @@ export default function Dashboard() {
       const createPromise = axios.post('/api/meetings', {
         title: `Instant Meeting - ${mongoUser?.displayName || 'User'}`,
         scheduledAt: new Date(),
-        duration: 45
+        duration: 90
       });
 
       const [_, response] = await Promise.all([delayPromise, createPromise]);
