@@ -212,9 +212,18 @@ export const useRecorder = (localStream, remoteStreams, roomId, hostId, pinnedUs
             } else if (N <= 4) {
               cols = 2;
               rows = 2;
-            } else {
+            } else if (N <= 6) {
               cols = 3;
               rows = 2;
+            } else if (N <= 9) {
+              cols = 3;
+              rows = 3;
+            } else if (N <= 12) {
+              cols = 4;
+              rows = 3;
+            } else {
+              cols = 4;
+              rows = 4;
             }
 
             const w = canvas.width / cols;

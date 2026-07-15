@@ -134,9 +134,9 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="fixed top-6 right-12 z-50 py-3 px-5 rounded-glass bg-blueAccent border border-blueAccent/40 text-white text-xs font-semibold shadow-lg shadow-blueAccent/15 flex items-center gap-2"
+              className="fixed top-6 left-1/2 -translate-x-1/2 z-50 py-3 px-5 rounded-glass bg-transparent border-2 border-blueAccent text-red-500 text-xs font-semibold shadow-lg flex items-center gap-2"
             >
-              <Sparkles className="w-4.5 h-4.5" /> {success}
+              <Sparkles className="w-4.5 h-4.5 text-blueAccent" /> {success}
             </motion.div>
           )}
           {error && (
