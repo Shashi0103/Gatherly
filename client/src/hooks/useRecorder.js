@@ -79,7 +79,7 @@ export const useRecorder = (localStream, remoteStreams, roomId, hostId) => {
 
       // Add all remote audio tracks
       Object.values(remoteStreams).forEach((peer) => {
-        if (peer.stream && peer.stream.getAudioTracks().length > 0 && !peer.isMuted) {
+        if (peer.stream && peer.stream.getAudioTracks().length > 0) {
           const peerAudioSource = audioContextRef.current.createMediaStreamSource(
             new MediaStream([peer.stream.getAudioTracks()[0]])
           );
@@ -105,7 +105,7 @@ export const useRecorder = (localStream, remoteStreams, roomId, hostId) => {
         const videoSources = [];
 
         // Check local video element
-        const localVideoEl = document.getElementById('video-local');
+        const localVideoEl = document.getElementById('video-feed-local');
         if (localVideoEl && localStream && localStream.getVideoTracks().length > 0 && localStream.getVideoTracks()[0].enabled) {
           videoSources.push({ el: localVideoEl, name: 'You' });
         } else {
@@ -115,7 +115,7 @@ export const useRecorder = (localStream, remoteStreams, roomId, hostId) => {
         // Check remote video elements
         Object.keys(remoteStreams).forEach((socketId) => {
           const peer = remoteStreams[socketId];
-          const videoEl = document.getElementById(`video-peer-${socketId}`);
+          const videoEl = document.getElementById(`video-feed-${socketId}`);
           
           if (videoEl && peer.stream && peer.stream.getVideoTracks().length > 0 && !peer.isCameraOff) {
             videoSources.push({ el: videoEl, name: peer.displayName });

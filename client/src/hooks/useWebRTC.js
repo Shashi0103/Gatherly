@@ -487,15 +487,15 @@ export const useWebRTC = (roomId, userId, displayName) => {
   // Media Control Actions
   const toggleMute = () => {
     if (localStreamRef.current) {
-      const enabled = !isMuted;
+      const nextMuteState = !isMuted;
       localStreamRef.current.getAudioTracks().forEach((track) => {
-        track.enabled = enabled;
+        track.enabled = !nextMuteState;
       });
-      setIsMuted(!isMuted);
+      setIsMuted(nextMuteState);
       // Sync state with peers
       broadcastEncryptedData({
         type: 'state-sync',
-        isMuted: !isMuted,
+        isMuted: nextMuteState,
         isCameraOff,
       });
     }
@@ -503,16 +503,16 @@ export const useWebRTC = (roomId, userId, displayName) => {
 
   const toggleCamera = () => {
     if (localStreamRef.current) {
-      const enabled = isCameraOff; // If camera is off, we turn it on (enabled = true)
+      const nextCameraOffState = !isCameraOff;
       localStreamRef.current.getVideoTracks().forEach((track) => {
-        track.enabled = enabled;
+        track.enabled = !nextCameraOffState;
       });
-      setIsCameraOff(!isCameraOff);
+      setIsCameraOff(nextCameraOffState);
       // Sync state with peers
       broadcastEncryptedData({
         type: 'state-sync',
         isMuted,
-        isCameraOff: !isCameraOff,
+        isCameraOff: nextCameraOffState,
       });
     }
   };
