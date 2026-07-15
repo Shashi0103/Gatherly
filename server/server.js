@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
@@ -68,18 +69,19 @@ app.use('/api/meetings', meetingRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/recordings', recordingRoutes);
 
-// Serve static assets in production
-if (process.env.NODE_ENV === 'production') {
+// Serve static assets in production if client build exists
+const clientBuildPath = path.join(__dirname, '../client/dist');
+if (process.env.NODE_ENV === 'production' && fs.existsSync(clientBuildPath)) {
   // Set static folder
-  app.use(express.static(path.join(__dirname, '../client/dist')));
+  app.use(express.static(clientBuildPath));
 
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
+    res.sendFile(path.resolve(clientBuildPath, 'index.html'));
   });
 } else {
   // Root endpoint
   app.get('/', (req, res) => {
-    res.send('Gatherly API is running...');
+    res.json({ message: 'Gatherly API is running...', env: process.env.NODE_ENV });
   });
 }
 
