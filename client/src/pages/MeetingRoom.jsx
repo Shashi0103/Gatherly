@@ -24,6 +24,34 @@ export default function MeetingRoom() {
   const [meetingError, setMeetingError] = useState('');
   const [pinnedUser, setPinnedUser] = useState(null);
 
+  // Hook up WebRTC Signaling
+  const {
+    localStream,
+    remoteStreams,
+    isMuted,
+    isCameraOff,
+    isScreenSharing,
+    chatMessages,
+    speakingUsers,
+    toggleMute,
+    toggleCamera,
+    toggleScreenShare,
+    sendChatMessage,
+  } = useWebRTC(roomId, mongoUser?.uid || mongoUser?._id, mongoUser?.displayName);
+
+  // Hook up Canvas + Web Audio API recorder
+  const {
+    isRecording,
+    isPaused,
+    recordingDuration,
+    isConverting,
+    conversionProgress,
+    startRecording,
+    pauseRecording,
+    resumeRecording,
+    stopRecording
+  } = useRecorder(localStream, remoteStreams, roomId, mongoUser?.uid || mongoUser?._id);
+
   // Helper to extract first letters of the name
   const getInitials = (name) => {
     if (!name) return 'U';
@@ -123,33 +151,7 @@ export default function MeetingRoom() {
     checkMeeting();
   }, [roomId]);
 
-  // Hook up WebRTC Signaling
-  const {
-    localStream,
-    remoteStreams,
-    isMuted,
-    isCameraOff,
-    isScreenSharing,
-    chatMessages,
-    speakingUsers,
-    toggleMute,
-    toggleCamera,
-    toggleScreenShare,
-    sendChatMessage,
-  } = useWebRTC(roomId, mongoUser?.uid, mongoUser?.displayName);
 
-  // Hook up Canvas + Web Audio API recorder
-  const {
-    isRecording,
-    isPaused,
-    recordingDuration,
-    isConverting,
-    conversionProgress,
-    startRecording,
-    pauseRecording,
-    resumeRecording,
-    stopRecording
-  } = useRecorder(localStream, remoteStreams, roomId, mongoUser?.uid);
 
   // Unread chat counter logic
   const prevMessagesLength = useRef(0);
@@ -462,7 +464,7 @@ export default function MeetingRoom() {
         roomId={roomId}
         messages={chatMessages}
         onSendMessage={sendChatMessage}
-        userId={mongoUser?.uid}
+        userId={mongoUser?.uid || mongoUser?._id}
       />
 
       {/* WebM to MP4 Conversion loading overlay */}

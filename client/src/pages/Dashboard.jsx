@@ -252,7 +252,7 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-4">
                 {upcomingList.map((meet) => {
-                  const isHost = meet.hostId === mongoUser?.uid;
+                  const isHost = meet.hostId === (mongoUser?.uid || mongoUser?._id);
                   return (
                     <motion.div
                       key={meet._id}
