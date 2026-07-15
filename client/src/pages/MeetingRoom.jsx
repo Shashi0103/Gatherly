@@ -13,7 +13,7 @@ import { useRecorder } from '../hooks/useRecorder';
 import ChatDrawer from '../components/ChatDrawer';
 
 export default function MeetingRoom() {
-  const { roomId } = useParams();
+  const { link: roomId } = useParams();
   const navigate = useNavigate();
   const { mongoUser } = useAuth();
   
