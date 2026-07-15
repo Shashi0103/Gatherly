@@ -1,0 +1,22 @@
+{
+  "name": "gatherly-root",
+  "version": "1.0.0",
+  "description": "Root workspace for Gatherly Video Conferences",
+  "main": "seed.js",
+  "type": "module",
+  "scripts": {
+    "install-all": "npm install && npm --prefix server install && npm --prefix client install",
+    "seed": "node server/seed.js",
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.3.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+:root {
+  /* Default Light Mode Colors */
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #F1F5F9;
+  
+  --surface-card: #FFFFFF;
+  --surface-glass: rgba(255, 255, 255, 0.75);
+  
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  
+  --border-color: rgba(15, 23, 42, 0.08);
+  --border-hover: rgba(59, 130, 246, 0.15);
+  
+  --shadow-val: 0 10px 25px rgba(15, 23, 42, 0.05);
+}
+
+.dark {
+  /* Dark Mode Overrides */
+  --bg-primary: #000000;
+  --bg-secondary: #0A0A0C;
+  
+  --surface-card: rgba(255, 255, 255, 0.05);
+  --surface-glass: rgba(255, 255, 255, 0.06);
+  
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(59, 130, 246, 0.25);
+  
+  --shadow-val: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  
+  --color-surface-card: var(--surface-card);
+  --color-surface-glass: var(--surface-glass);
+  
+  --color-blueAccent: #3B82F6;
+  --color-blueAccent-hover: #2563EB;
+  --color-blueAccent-light: #60A5FA;
+  
+  --color-greenAccent: #10B981;
+  --color-greenAccent-hover: #059669;
+  --color-greenAccent-light: #34D399;
+  
+  --color-textCol-primary: var(--text-primary);
+  --color-textCol-secondary: var(--text-secondary);
+  --color-textCol-muted: var(--text-muted);
+  
+  --color-borderCol: var(--border-color);
+  --color-borderCol-focused: #10B981;
+  --color-borderCol-hover: var(--border-hover);
+
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-glass: 18px;
+  --shadow-glass: var(--shadow-val);
+}
+
+@layer base {
+  body {
+    @apply bg-bg-primary text-textCol-primary font-sans antialiased overflow-x-hidden;
+    /* Solid background - no linear or radial gradients */
+    background-image: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Custom inputs with blue/green focus styles */
+  input, select, textarea {
+    @apply bg-surface-card border border-borderCol rounded-xl py-2.5 px-4 text-textCol-primary outline-none transition-all duration-200 placeholder:text-textCol-muted;
+  }
+  
+  input:focus, select:focus, textarea:focus {
+    @apply border-borderCol-focused ring-2 ring-greenAccent/20;
+  }
+
+  /* Custom Scrollbar for modern look */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.2);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(128, 128, 128, 0.4);
+  }
+}
+
+@layer components {
+  /* Premium Glass Glassmorphism panels */
+  .glass-panel {
+    background: var(--surface-glass);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    box-shadow: var(--shadow-val);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .glass-card {
+    @apply bg-surface-card hover:bg-surface-glass border border-borderCol hover:border-blueAccent/25 transition-all duration-300 rounded-glass shadow-glass;
+  }
+
+  /* Button presets (Solid colors - no gradients) */
+  .btn-primary {
+    @apply bg-blueAccent hover:bg-blueAccent-hover text-white font-medium py-2.5 px-5 rounded-glass transition-all duration-200 shadow-md shadow-blueAccent/10 active:scale-98;
+  }
+
+  .btn-secondary {
+    @apply bg-greenAccent hover:bg-greenAccent-hover text-white font-medium py-2.5 px-5 rounded-glass transition-all duration-200 shadow-md shadow-greenAccent/10 active:scale-98;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent hover:bg-surface-glass border border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary font-medium py-2.5 px-5 rounded-glass transition-all duration-200 active:scale-98;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-5 rounded-glass transition-all duration-200 shadow-md shadow-red-600/10 active:scale-98;
+  }
+
+  /* Speaking user green ring indicator animation */
+  .speaking-indicator {
+    animation: pulse-ring 1.5s infinite;
+  }
+
+  .animate-pulse-heart {
+    animation: heartbeat 1.2s infinite;
+    transform-origin: center;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.18);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.18);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
