@@ -33,6 +33,7 @@ export default function MeetingRoom() {
     isScreenSharing,
     chatMessages,
     speakingUsers,
+    micLevels,
     toggleMute,
     toggleCamera,
     toggleScreenShare,
@@ -107,10 +108,29 @@ export default function MeetingRoom() {
         )}
 
         {/* User Name Label Overlay (Top) */}
-        <div className="z-10 p-2.5 bg-black/40 flex items-start justify-between rounded-t-2xl">
-          <span className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-white font-semibold line-clamp-1`}>
-            {displayName} {isScreenSharing && ' (Sharing)'}
-          </span>
+        <div className="z-10 p-2.5 bg-black/40 flex items-center justify-between rounded-t-2xl">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-white font-semibold line-clamp-1`}>
+              {displayName} {isScreenSharing && ' (Sharing)'}
+            </span>
+            {/* Live Mic Level Equalizer Feed */}
+            {!isMuted && (micLevels[id] || 0) > 0 && (
+              <div className="flex items-end gap-[2px] h-3.5 shrink-0 px-0.5">
+                <div 
+                  className="w-[3px] bg-greenAccent rounded-full transition-all duration-75" 
+                  style={{ height: `${Math.max(20, Math.min(100, (micLevels[id] || 0) * 1.2))}%` }}
+                />
+                <div 
+                  className="w-[3px] bg-greenAccent rounded-full transition-all duration-75" 
+                  style={{ height: `${Math.max(20, Math.min(100, (micLevels[id] || 0) * 1.6))}%` }}
+                />
+                <div 
+                  className="w-[3px] bg-greenAccent rounded-full transition-all duration-75" 
+                  style={{ height: `${Math.max(20, Math.min(100, (micLevels[id] || 0) * 0.9))}%` }}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Pin Control Button */}

@@ -19,6 +19,7 @@ export const useWebRTC = (roomId, userId, displayName) => {
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [speakingUsers, setSpeakingUsers] = useState({});
+  const [micLevels, setMicLevels] = useState({});
 
   const socketRef = useRef(null);
   const pcsRef = useRef({}); // socketId -> RTCPeerConnection
@@ -381,6 +382,13 @@ export const useWebRTC = (roomId, userId, displayName) => {
           if (prev['local'] === isSpeaking) return prev;
           return { ...prev, local: isSpeaking };
         });
+
+        // Compute volume level 0 - 100
+        const level = Math.min(100, Math.round((average / 128) * 100));
+        setMicLevels((prev) => {
+          if (prev['local'] === level) return prev;
+          return { ...prev, local: level };
+        });
       }, 200);
 
       localAnalysersRef.current = { mic: analyser, interval };
@@ -427,6 +435,13 @@ export const useWebRTC = (roomId, userId, displayName) => {
           if (prev[socketId] === isSpeaking) return prev;
           return { ...prev, [socketId]: isSpeaking };
         });
+
+        // Compute volume level 0 - 100
+        const level = Math.min(100, Math.round((average / 128) * 100));
+        setMicLevels((prev) => {
+          if (prev[socketId] === level) return prev;
+          return { ...prev, [socketId]: level };
+        });
       }, 200);
 
       peerAnalysersRef.current[socketId] = { analyser, interval };
@@ -451,6 +466,12 @@ export const useWebRTC = (roomId, userId, displayName) => {
     }
 
     setRemoteStreams((prev) => {
+      const copy = { ...prev };
+      delete copy[socketId];
+      return copy;
+    });
+
+    setMicLevels((prev) => {
       const copy = { ...prev };
       delete copy[socketId];
       return copy;
@@ -590,6 +611,7 @@ export const useWebRTC = (roomId, userId, displayName) => {
     isScreenSharing,
     chatMessages,
     speakingUsers,
+    micLevels,
     toggleMute,
     toggleCamera,
     toggleScreenShare,
