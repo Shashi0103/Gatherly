@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, Calendar, Plus, Link as LinkIcon, Trash2, Users, Clock, Play, Search, Activity, Sparkles } from 'lucide-react';
+import { Video, Calendar, Plus, Link as LinkIcon, Trash2, Users, Clock, Play, Search, Activity, Sparkles, Check } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
@@ -103,11 +103,13 @@ export default function Dashboard() {
     }
   };
 
-  const copyToClipboard = (linkCode) => {
+  const [copiedMeetingId, setCopiedMeetingId] = useState(null);
+
+  const copyToClipboard = (linkCode, meetingId) => {
     const fullUrl = `${window.location.origin}/meet/${linkCode}`;
     navigator.clipboard.writeText(fullUrl);
-    setSuccess('Meeting link copied!');
-    setTimeout(() => setSuccess(''), 2000);
+    setCopiedMeetingId(meetingId);
+    setTimeout(() => setCopiedMeetingId(null), 2000);
   };
 
   const getGreeting = () => {
@@ -129,16 +131,7 @@ export default function Dashboard() {
       <main className="flex-1 overflow-y-auto h-screen p-8 pr-12 relative">
         {/* Alerts notifications */}
         <AnimatePresence>
-          {success && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="fixed top-6 left-1/2 -translate-x-1/2 z-50 py-3 px-5 rounded-glass bg-transparent border-2 border-blueAccent text-red-500 text-xs font-semibold shadow-lg flex items-center gap-2"
-            >
-              <Sparkles className="w-4.5 h-4.5 text-blueAccent" /> {success}
-            </motion.div>
-          )}
+
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -279,11 +272,23 @@ export default function Dashboard() {
 
                       <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end border-t sm:border-none border-borderCol pt-3 sm:pt-0">
                         <button
-                          onClick={() => copyToClipboard(meet.meetingLink)}
-                          className="p-2.5 rounded-xl bg-surface-glass border border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary transition-all text-xs flex items-center gap-1.5"
+                          onClick={() => copyToClipboard(meet.meetingLink, meet._id)}
+                          className={`p-2.5 rounded-xl border transition-all text-xs flex items-center gap-1.5 ${
+                            copiedMeetingId === meet._id
+                              ? 'bg-blueAccent/15 border-blueAccent text-blue-300'
+                              : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
+                          }`}
                           title="Copy Link"
                         >
-                          <LinkIcon className="w-4 h-4" /> Copy
+                          {copiedMeetingId === meet._id ? (
+                            <>
+                              <Check className="w-4 h-4 text-blue-300" /> Copied
+                            </>
+                          ) : (
+                            <>
+                              <LinkIcon className="w-4 h-4" /> Copy
+                            </>
+                          )}
                         </button>
                         
                         {isHost && (
