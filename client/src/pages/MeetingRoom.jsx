@@ -246,7 +246,7 @@ export default function MeetingRoom() {
       </header>
 
       {/* Dynamic Video Feeds Layout */}
-      <div className="flex-1 flex p-6 pb-24 min-h-0 w-full justify-center items-center overflow-hidden relative">
+      <div className="flex-1 flex p-6 min-h-0 w-full justify-center items-center overflow-hidden relative">
         {!pinnedUser ? (
           /* Standard Grid Layout */
           <div className={`grid gap-5 w-full h-full justify-center content-center ${getGridClass()}`}>
