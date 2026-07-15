@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Video, Shield, Monitor, MessageSquare, Calendar, Download, Users, Zap, Check, Sun, Moon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Video, Shield, Monitor, MessageSquare, Calendar, Download, Users, Zap, Check, Sun, Moon, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -10,6 +10,7 @@ export default function Home() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [meetingCode, setMeetingCode] = useState('');
+  const [modalType, setModalType] = useState(null);
 
   const handleJoin = (e) => {
     e.preventDefault();
@@ -331,17 +332,75 @@ export default function Home() {
             </div>
             <span className="font-semibold text-textCol-secondary text-sm">Gatherly</span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3.5 text-center sm:text-right">
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-right">
             <p>&copy; {new Date().getFullYear()} Gatherly. All rights reserved.</p>
             <span className="hidden sm:inline text-textCol-muted/40">|</span>
-            <p className="flex items-center gap-1 text-textCol-secondary">
-              Built with{' '}
-              <span className="inline-block animate-pulse-heart text-blueAccent font-sans">🩵</span>{' '}
-              by Shashi Kumar Sahu
-            </p>
+            <div className="flex items-center gap-4 text-xs">
+              <button onClick={() => setModalType('about')} className="hover:text-white transition-colors cursor-pointer font-medium focus:outline-none">About Us</button>
+              <span className="text-textCol-muted/40">•</span>
+              <button onClick={() => setModalType('terms')} className="hover:text-white transition-colors cursor-pointer font-medium focus:outline-none">Terms of Service</button>
+              <span className="text-textCol-muted/40">•</span>
+              <button onClick={() => setModalType('privacy')} className="hover:text-white transition-colors cursor-pointer font-medium focus:outline-none">Privacy Policy</button>
+            </div>
           </div>
         </div>
       </footer>
+
+      {/* Footer Info Modals */}
+      <AnimatePresence>
+        {modalType && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-lg glass-panel bg-bg-secondary p-8 border border-white/10 relative shadow-2xl flex flex-col max-h-[80vh] overflow-y-auto"
+            >
+              <button 
+                onClick={() => setModalType(null)} 
+                className="absolute right-6 top-6 text-textCol-muted hover:text-white transition-colors cursor-pointer focus:outline-none"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {modalType === 'about' && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-white mb-2">About Us</h3>
+                  <p className="text-sm text-textCol-secondary leading-relaxed">
+                    Gatherly is a next-generation, lightweight, and secure video conferencing platform built using modern WebRTC technology and real-time WebSocket signaling.
+                  </p>
+                  <p className="text-sm text-textCol-secondary leading-relaxed">
+                    Our mission is to simplify remote collaboration by allowing teams to connect instantly in high-definition directly from their browser, with no software downloads or plugin installations required. We prioritize privacy, security, and responsive layouts to deliver a premium user experience.
+                  </p>
+                </div>
+              )}
+
+              {modalType === 'terms' && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-white mb-2">Terms of Service</h3>
+                  <div className="space-y-3 text-sm text-textCol-secondary leading-relaxed">
+                    <p><strong>1. Acceptance of Terms:</strong> By accessing or using Gatherly, you agree to comply with and be bound by these Terms of Service.</p>
+                    <p><strong>2. Fair Usage:</strong> You agree to use Gatherly only for lawful purposes. Abuse of server signaling APIs or network resources is strictly prohibited.</p>
+                    <p><strong>3. Content Policy:</strong> Users are solely responsible for media shared during sessions. Broadcasting copyrighted or inappropriate material is forbidden.</p>
+                    <p><strong>4. Disclaimer of Liability:</strong> Gatherly is provided "as is". We are not liable for call disconnections or failures resulting from local internet connections or browser constraints.</p>
+                  </div>
+                </div>
+              )}
+
+              {modalType === 'privacy' && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-white mb-2">Privacy Policy</h3>
+                  <div className="space-y-3 text-sm text-textCol-secondary leading-relaxed">
+                    <p><strong>1. Peer-to-Peer Data:</strong> Gatherly relies on WebRTC to transmit video and audio streams directly between users. We do not inspect, collect, or store your live call media on our servers.</p>
+                    <p><strong>2. Account & Room Info:</strong> We save minimal account details (display name, email) and meeting room links securely in MongoDB to facilitate scheduling features.</p>
+                    <p><strong>3. Secure Recordings:</strong> Session recordings are generated inside your browser and compiled locally on your device. We do not store or transmit your recordings to third parties.</p>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
