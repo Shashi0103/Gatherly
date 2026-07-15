@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mic, MicOff, Video, VideoOff, Monitor, MessageSquare, 
-  PhoneOff, Radio, Play, Pause, Square, AlertCircle, Copy, Check 
+  PhoneOff, Radio, Play, Pause, Square, AlertCircle, Copy, Check,
+  Pin, PinOff
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -21,6 +22,7 @@ export default function MeetingRoom() {
   const [unreadChatCount, setUnreadChatCount] = useState(0);
   const [copied, setCopied] = useState(false);
   const [meetingError, setMeetingError] = useState('');
+  const [pinnedUser, setPinnedUser] = useState(null);
 
   // Helper to extract first letters of the name
   const getInitials = (name) => {
@@ -28,6 +30,83 @@ export default function MeetingRoom() {
     const parts = name.trim().split(' ');
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
     return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  };
+
+  // Reset pinned user if they disconnect
+  useEffect(() => {
+    if (pinnedUser && pinnedUser !== 'local' && !remoteStreams[pinnedUser]) {
+      setPinnedUser(null);
+    }
+  }, [remoteStreams, pinnedUser]);
+
+  const renderVideoCard = (id, stream, displayName, isMuted, isCameraOff, isScreenSharing, isLocal, isSmall = false) => {
+    const isSpeaking = speakingUsers[id];
+    const isPinned = pinnedUser === id;
+    
+    return (
+      <div
+        className={`rounded-2xl overflow-hidden glass-panel bg-bg-secondary border relative aspect-video shadow-lg group flex flex-col justify-between transition-all duration-300 ${
+          isSmall ? 'w-full shrink-0 border-borderCol' : 'w-full h-full'
+        } ${
+          !isLocal && isMuted ? 'opacity-90' : 'opacity-100'
+        } ${
+          isSpeaking && !isMuted ? 'border-greenAccent speaking-indicator ring-4 ring-greenAccent/20' : 'border-borderCol'
+        }`}
+      >
+        {stream && !isCameraOff && (
+          <video
+            id={`video-feed-${id}`}
+            autoPlay
+            playsInline
+            muted={isLocal}
+            ref={(el) => {
+              if (el && stream && el.srcObject !== stream) {
+                el.srcObject = stream;
+              }
+            }}
+            className={`w-full h-full object-cover rounded-2xl bg-bg-primary absolute inset-0 ${isLocal ? 'transform scale-x-[-1]' : ''}`}
+          />
+        )}
+
+        {/* Video Muted Overlay Placeholder */}
+        {isCameraOff && (
+          <div className="absolute inset-0 bg-bg-secondary flex flex-col items-center justify-center gap-3">
+            <div className={`rounded-full flex items-center justify-center text-white font-bold ${isSmall ? 'w-10 h-10 text-sm' : 'w-16 h-16 text-xl'} ${isLocal ? 'bg-blueAccent' : 'bg-greenAccent'}`}>
+              {getInitials(displayName)}
+            </div>
+            {!isSmall && <span className="text-[10px] text-textCol-muted uppercase font-semibold tracking-wider">Camera Turned Off</span>}
+          </div>
+        )}
+
+        {/* User Name Label Overlay (Top) */}
+        <div className="z-10 p-2.5 bg-black/40 flex items-start justify-between rounded-t-2xl">
+          <span className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-white font-semibold line-clamp-1`}>
+            {displayName} {isScreenSharing && ' (Sharing)'}
+          </span>
+        </div>
+
+        {/* Pin Control Button */}
+        <button
+          type="button"
+          onClick={() => setPinnedUser(isPinned ? null : id)}
+          className={`absolute top-2.5 right-2.5 z-20 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all cursor-pointer ${
+            isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100'
+          }`}
+          title={isPinned ? "Unpin user" : "Pin user"}
+        >
+          {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
+        </button>
+
+        {/* Status Badges (Bottom) */}
+        <div className="z-10 p-2.5 self-end flex gap-2">
+          {isMuted && (
+            <span className={`${isSmall ? 'w-5 h-5' : 'w-6 h-6'} rounded bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-400`}>
+              <MicOff className={`${isSmall ? 'w-3 h-3' : 'w-3.5 h-3.5'}`} />
+            </span>
+          )}
+        </div>
+      </div>
+    );
   };
 
   // Fetch meeting metadata first
@@ -164,112 +243,101 @@ export default function MeetingRoom() {
         )}
       </header>
 
-      {/* Grid of Users (Audio/Video Streams) */}
-      <div className="flex-1 flex items-center justify-center p-6 min-h-0">
-        <div className={`grid gap-5 w-full h-full justify-center content-center ${getGridClass()}`}>
-          {/* 1. Local Video Element */}
-          <div className={`rounded-2xl overflow-hidden glass-panel bg-bg-secondary border relative aspect-video shadow-lg group flex flex-col justify-between transition-all duration-300 ${
-            speakingUsers['local'] && !isMuted ? 'border-greenAccent speaking-indicator ring-4 ring-greenAccent/20' : 'border-borderCol'
-          }`}>
-            <video
-              id="video-local"
-              autoPlay
-              playsInline
-              muted
-              ref={(el) => {
-                if (el && localStream && el.srcObject !== localStream) {
-                  el.srcObject = localStream;
-                }
-              }}
-              className="w-full h-full object-cover rounded-2xl bg-bg-primary absolute inset-0 transform scale-x-[-1]"
-            />
-
-            {/* Video Camera Muted Overlay Placeholder */}
-            {isCameraOff && (
-              <div className="absolute inset-0 bg-bg-secondary flex flex-col items-center justify-center gap-3">
-                <div className="w-16 h-16 rounded-full bg-blueAccent flex items-center justify-center text-white text-xl font-bold">
-                  {getInitials(mongoUser?.displayName)}
-                </div>
-                <span className="text-[10px] text-textCol-muted uppercase font-semibold tracking-wider">Camera Turned Off</span>
-              </div>
+      {/* Dynamic Video Feeds Layout */}
+      <div className="flex-1 flex p-6 min-h-0 w-full justify-center items-center overflow-hidden">
+        {!pinnedUser ? (
+          /* Standard Grid Layout */
+          <div className={`grid gap-5 w-full h-full justify-center content-center ${getGridClass()}`}>
+            {/* 1. Local Video Card */}
+            {renderVideoCard(
+              'local',
+              localStream,
+              mongoUser?.displayName || 'You',
+              isMuted,
+              isCameraOff,
+              isScreenSharing,
+              true
             )}
 
-            {/* User Name Label Overlay (Top) */}
-            <div className="z-10 p-2.5 bg-black/40 flex items-start rounded-t-2xl">
-              <span className="text-xs text-white font-semibold">
-                {mongoUser?.displayName || 'You'} {isScreenSharing && ' (Sharing)'}
-              </span>
+            {/* 2. Remote Video Cards */}
+            {Object.keys(remoteStreams).map((socketId) => {
+              const peer = remoteStreams[socketId];
+              return renderVideoCard(
+                socketId,
+                peer.stream,
+                peer.displayName || 'Participant',
+                peer.isMuted,
+                peer.isCameraOff || !peer.stream,
+                peer.isScreenSharing,
+                false
+              );
+            })}
+          </div>
+        ) : (
+          /* Pinned Speaker / Speaker Zoom Layout */
+          <div className="flex w-full h-full gap-5 overflow-hidden">
+            {/* Main Stage (Zoomed Pinned User) */}
+            <div className="flex-1 h-full min-w-0">
+              {pinnedUser === 'local'
+                ? renderVideoCard(
+                    'local',
+                    localStream,
+                    mongoUser?.displayName || 'You',
+                    isMuted,
+                    isCameraOff,
+                    isScreenSharing,
+                    true
+                  )
+                : (() => {
+                    const peer = remoteStreams[pinnedUser];
+                    return peer
+                      ? renderVideoCard(
+                          pinnedUser,
+                          peer.stream,
+                          peer.displayName || 'Participant',
+                          peer.isMuted,
+                          peer.isCameraOff || !peer.stream,
+                          peer.isScreenSharing,
+                          false
+                        )
+                      : null;
+                  })()}
             </div>
 
-            {/* Speaking / Audio Status Icons (Bottom) */}
-            <div className="z-10 p-3 self-end flex gap-2">
-              {isMuted && (
-                <span className="w-6 h-6 rounded-lg bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-400">
-                  <MicOff className="w-3.5 h-3.5" />
-                </span>
-              )}
+            {/* Sidebar Thumbnails List (Scrollable column for other participants) */}
+            <div className="w-64 shrink-0 flex flex-col gap-4 overflow-y-auto pr-1">
+              {/* Show Local in sidebar if not pinned */}
+              {pinnedUser !== 'local' &&
+                renderVideoCard(
+                  'local',
+                  localStream,
+                  mongoUser?.displayName || 'You',
+                  isMuted,
+                  isCameraOff,
+                  isScreenSharing,
+                  true,
+                  true
+                )}
+
+              {/* Show Remotes in sidebar if not pinned */}
+              {Object.keys(remoteStreams)
+                .filter((socketId) => socketId !== pinnedUser)
+                .map((socketId) => {
+                  const peer = remoteStreams[socketId];
+                  return renderVideoCard(
+                    socketId,
+                    peer.stream,
+                    peer.displayName || 'Participant',
+                    peer.isMuted,
+                    peer.isCameraOff || !peer.stream,
+                    peer.isScreenSharing,
+                    false,
+                    true
+                  );
+                })}
             </div>
           </div>
-
-          {/* 2. Remote Video Elements */}
-          {Object.keys(remoteStreams).map((socketId) => {
-            const peer = remoteStreams[socketId];
-            const isPeerMuted = peer.isMuted;
-            const isPeerCameraOff = peer.isCameraOff || !peer.stream;
-            const isSpeaking = speakingUsers[socketId];
-
-            return (
-              <div
-                key={socketId}
-                className={`rounded-2xl overflow-hidden glass-panel bg-bg-secondary border relative aspect-video shadow-lg group flex flex-col justify-between transition-all duration-300 ${
-                  isPeerMuted ? 'opacity-70' : 'opacity-100'
-                } ${
-                  isSpeaking && !isPeerMuted ? 'border-greenAccent speaking-indicator ring-4 ring-greenAccent/20' : 'border-borderCol'
-                }`}
-              >
-                {peer.stream && (
-                  <video
-                    id={`video-peer-${socketId}`}
-                    autoPlay
-                    playsInline
-                    ref={(el) => {
-                      if (el && peer.stream && el.srcObject !== peer.stream) {
-                        el.srcObject = peer.stream;
-                      }
-                    }}
-                    className="w-full h-full object-cover rounded-2xl bg-bg-primary absolute inset-0"
-                  />
-                )}
-
-                {/* Video Muted Overlay Placeholder */}
-                {isPeerCameraOff && (
-                  <div className="absolute inset-0 bg-bg-secondary flex flex-col items-center justify-center gap-3">
-                    <div className="w-16 h-16 rounded-full bg-greenAccent flex items-center justify-center text-white text-xl font-bold">
-                      {getInitials(peer.displayName)}
-                    </div>
-                    <span className="text-[10px] text-textCol-muted uppercase font-semibold tracking-wider">Camera Turned Off</span>
-                  </div>
-                )}
-
-                {/* User Name Label Overlay (Top) */}
-                <div className="z-10 p-2.5 bg-black/40 flex items-start rounded-t-2xl">
-                  <span className="text-xs text-white font-semibold">
-                    {peer.displayName || 'Participant'} {peer.isScreenSharing && ' (Sharing)'}
-                  </span>
-                </div>
-
-                {/* Status Badges (Bottom) */}
-                <div className="z-10 p-3 self-end flex gap-2">
-                  {isPeerMuted && (
-                    <span className="w-6 h-6 rounded-lg bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-400">
-                      <MicOff className="w-3.5 h-3.5" />
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        )}
       </div>
 
       {/* Floating Control Bar */}
