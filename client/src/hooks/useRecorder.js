@@ -3,7 +3,46 @@ import axios from 'axios';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
-export const useRecorder = (localStream, remoteStreams, roomId, hostId) => {
+const drawPlaceholderCard = (ctx, name, x, y, w, h) => {
+  ctx.fillStyle = '#0d2530';
+  ctx.fillRect(x + 5, y + 5, w - 10, h - 10);
+  
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x + 5, y + 5, w - 10, h - 10);
+
+  // Circular Avatar
+  ctx.beginPath();
+  ctx.arc(x + w / 2, y + h / 2 - 15, Math.min(w, h) * 0.15, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+  ctx.fill();
+  ctx.strokeStyle = '#3B82F6';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Text Initials
+  ctx.fillStyle = '#CBD5E1';
+  ctx.font = `bold ${Math.min(w, h) * 0.1}px Inter`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const parts = name.trim().split(' ');
+  const initials = parts.length === 1 
+    ? parts[0].charAt(0).toUpperCase() 
+    : (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  ctx.fillText(initials, x + w / 2, y + h / 2 - 15);
+};
+
+const drawNameTag = (ctx, name, x, y, w, h) => {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+  ctx.fillRect(x + 12, y + h - 40, ctx.measureText(name).width + 24, 26);
+  ctx.fillStyle = '#F8FAFC';
+  ctx.font = '12px Inter';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(name, x + 24, y + h - 27);
+};
+
+export const useRecorder = (localStream, remoteStreams, roomId, hostId, pinnedUser) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -107,9 +146,9 @@ export const useRecorder = (localStream, remoteStreams, roomId, hostId) => {
         // Check local video element
         const localVideoEl = document.getElementById('video-feed-local');
         if (localVideoEl && localStream && localStream.getVideoTracks().length > 0 && localStream.getVideoTracks()[0].enabled) {
-          videoSources.push({ el: localVideoEl, name: 'You' });
+          videoSources.push({ id: 'local', el: localVideoEl, name: 'You' });
         } else {
-          videoSources.push({ name: 'You (Camera Off)', fallback: true });
+          videoSources.push({ id: 'local', name: 'You (Camera Off)', fallback: true });
         }
 
         // Check remote video elements
@@ -118,72 +157,83 @@ export const useRecorder = (localStream, remoteStreams, roomId, hostId) => {
           const videoEl = document.getElementById(`video-feed-${socketId}`);
           
           if (videoEl && peer.stream && peer.stream.getVideoTracks().length > 0 && !peer.isCameraOff) {
-            videoSources.push({ el: videoEl, name: peer.displayName });
+            videoSources.push({ id: socketId, el: videoEl, name: peer.displayName || 'Participant' });
           } else {
-            videoSources.push({ name: peer.displayName || 'Participant', fallback: true });
+            videoSources.push({ id: socketId, name: peer.displayName || 'Participant', fallback: true });
           }
         });
 
         const N = videoSources.length;
         if (N > 0) {
-          // Layout calculations
-          let cols = 1;
-          let rows = 1;
+          if (pinnedUser && N > 1) {
+            // Pinned Layout matching the meeting room
+            const pinnedSource = videoSources.find(src => src.id === pinnedUser);
+            const otherSources = videoSources.filter(src => src.id !== pinnedUser);
 
-          if (N === 2) { cols = 2; rows = 1; }
-          else if (N <= 4) { cols = 2; rows = 2; }
-          else { cols = 3; rows = 2; }
-
-          const w = canvas.width / cols;
-          const h = canvas.height / rows;
-
-          videoSources.forEach((src, idx) => {
-            const col = idx % cols;
-            const row = Math.floor(idx / cols);
-            const x = col * w;
-            const y = row * h;
-
-            if (!src.fallback && src.el) {
-              // Draw video frame
-              ctx.drawImage(src.el, x, y, w, h);
-            } else {
-              // Draw placeholder avatar card
-              ctx.fillStyle = '#0d2530';
-              ctx.fillRect(x + 5, y + 5, w - 10, h - 10);
-              
-              ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-              ctx.lineWidth = 1;
-              ctx.strokeRect(x + 5, y + 5, w - 10, h - 10);
-
-              // Circular Avatar
-              ctx.beginPath();
-              ctx.arc(x + w / 2, y + h / 2 - 15, Math.min(w, h) * 0.15, 0, Math.PI * 2);
-              ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
-              ctx.fill();
-              ctx.strokeStyle = '#3B82F6';
-              ctx.lineWidth = 2;
-              ctx.stroke();
-
-              // Text Initials
-              ctx.fillStyle = '#CBD5E1';
-              ctx.font = `bold ${Math.min(w, h) * 0.1}px Inter`;
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              const parts = src.name.trim().split(' ');
-              const initials = parts.length === 1 
-                ? parts[0].charAt(0).toUpperCase() 
-                : (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-              ctx.fillText(initials, x + w / 2, y + h / 2 - 15);
+            // 1. Draw Pinned Source on the left (960x720)
+            if (pinnedSource) {
+              if (!pinnedSource.fallback && pinnedSource.el) {
+                ctx.drawImage(pinnedSource.el, 0, 0, 960, 720);
+              } else {
+                drawPlaceholderCard(ctx, pinnedSource.name, 0, 0, 960, 720);
+              }
+              drawNameTag(ctx, pinnedSource.name, 0, 0, 960, 720);
             }
 
-            // Draw Participant Name Label
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-            ctx.fillRect(x + 12, y + h - 40, ctx.measureText(src.name).width + 24, 26);
-            ctx.fillStyle = '#F8FAFC';
-            ctx.font = '12px Inter';
-            ctx.textAlign = 'left';
-            ctx.fillText(src.name, x + 24, y + h - 23);
-          });
+            // 2. Draw Other Sources in the sidebar (320px wide)
+            const M = otherSources.length;
+            if (M > 0) {
+              const thumbW = 320;
+              const thumbH = 720 / M;
+              
+              otherSources.forEach((src, idx) => {
+                const x = 960;
+                const y = idx * thumbH;
+                
+                if (!src.fallback && src.el) {
+                  ctx.drawImage(src.el, x, y, thumbW, thumbH);
+                } else {
+                  drawPlaceholderCard(ctx, src.name, x, y, thumbW, thumbH);
+                }
+                drawNameTag(ctx, src.name, x, y, thumbW, thumbH);
+              });
+            }
+          } else {
+            // Standard Grid Layout
+            let cols = 1;
+            let rows = 1;
+
+            if (N === 1) {
+              cols = 1;
+              rows = 1;
+            } else if (N === 2) {
+              cols = 2;
+              rows = 1;
+            } else if (N <= 4) {
+              cols = 2;
+              rows = 2;
+            } else {
+              cols = 3;
+              rows = 2;
+            }
+
+            const w = canvas.width / cols;
+            const h = canvas.height / rows;
+
+            videoSources.forEach((src, idx) => {
+              const col = idx % cols;
+              const row = Math.floor(idx / cols);
+              const x = col * w;
+              const y = row * h;
+
+              if (!src.fallback && src.el) {
+                ctx.drawImage(src.el, x, y, w, h);
+              } else {
+                drawPlaceholderCard(ctx, src.name, x, y, w, h);
+              }
+              drawNameTag(ctx, src.name, x, y, w, h);
+            });
+          }
         }
 
         animationFrameIdRef.current = requestAnimationFrame(drawFrame);

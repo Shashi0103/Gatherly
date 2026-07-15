@@ -51,7 +51,7 @@ export default function MeetingRoom() {
     pauseRecording,
     resumeRecording,
     stopRecording
-  } = useRecorder(localStream, remoteStreams, roomId, mongoUser?.uid || mongoUser?._id);
+  } = useRecorder(localStream, remoteStreams, roomId, mongoUser?.uid || mongoUser?._id, pinnedUser);
 
   // Helper to extract first letters of the name
   const getInitials = (name) => {
