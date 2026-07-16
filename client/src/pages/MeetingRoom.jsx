@@ -317,26 +317,32 @@ export default function MeetingRoom() {
     prevMessagesLength.current = chatMessages.length;
   }, [chatMessages, isChatOpen]);
 
-  // Handle private message notifications
-  const [privateMsgAlert, setPrivateMsgAlert] = useState(null);
+  // Handle incoming chat notifications (private and broadcast)
+  const [messageAlert, setMessageAlert] = useState(null);
   const prevMessagesRef = useRef([]);
   useEffect(() => {
     if (chatMessages.length > prevMessagesRef.current.length) {
       const latestMsg = chatMessages[chatMessages.length - 1];
       const currentUserId = mongoUser?.uid || mongoUser?._id;
       
-      // If it's a private message sent to us and not by us, trigger the toast
-      if (latestMsg && latestMsg.recipientId === currentUserId && latestMsg.senderId !== currentUserId) {
-        setPrivateMsgAlert({
-          sender: latestMsg.sender?.displayName || 'Participant',
-          text: latestMsg.message,
-        });
-        const timeoutId = setTimeout(() => setPrivateMsgAlert(null), 4000);
-        return () => clearTimeout(timeoutId);
+      // If the message is not sent by us and the chat drawer is closed, trigger toast
+      if (latestMsg && latestMsg.senderId !== currentUserId && !isChatOpen) {
+        const isPrivate = latestMsg.recipientId === currentUserId;
+        const isBroadcast = !latestMsg.recipientId;
+        
+        if (isPrivate || isBroadcast) {
+          setMessageAlert({
+            type: isPrivate ? 'private' : 'broadcast',
+            sender: latestMsg.sender?.displayName || 'Participant',
+            text: latestMsg.message,
+          });
+          const timeoutId = setTimeout(() => setMessageAlert(null), 4000);
+          return () => clearTimeout(timeoutId);
+        }
       }
     }
     prevMessagesRef.current = chatMessages;
-  }, [chatMessages, mongoUser]);
+  }, [chatMessages, mongoUser, isChatOpen]);
 
   const handleCopyLink = () => {
     const fullUrl = `${window.location.origin}/meet/${roomId}`;
@@ -403,21 +409,29 @@ export default function MeetingRoom() {
         )}
       </AnimatePresence>
 
-      {/* Private Message Toast Notification */}
+      {/* Chat Message Notification Toast (Private or Broadcast) */}
       <AnimatePresence>
-        {privateMsgAlert && (
+        {messageAlert && (
           <motion.div
             initial={{ opacity: 0, x: 50, y: 0 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
             exit={{ opacity: 0, x: 50 }}
-            className="fixed top-24 right-6 z-50 py-3.5 px-5 rounded-2xl glass-panel bg-bg-secondary/95 border border-purple-500/30 text-white text-xs font-semibold shadow-2xl flex flex-col gap-1 max-w-[280px] backdrop-blur-xl"
+            className={`fixed top-24 right-6 z-50 py-3.5 px-5 rounded-2xl glass-panel bg-bg-secondary/95 border text-white text-xs font-semibold shadow-2xl flex flex-col gap-1 max-w-[280px] backdrop-blur-xl ${
+              messageAlert.type === 'private' ? 'border-purple-500/30' : 'border-blueAccent/30'
+            }`}
           >
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />
-              <span className="text-purple-400 font-bold text-[9px] uppercase tracking-wider">Private Message</span>
+              <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${
+                messageAlert.type === 'private' ? 'bg-purple-500' : 'bg-blueAccent'
+              }`} />
+              <span className={`font-bold text-[9px] uppercase tracking-wider ${
+                messageAlert.type === 'private' ? 'text-purple-400' : 'text-blueAccent-light'
+              }`}>
+                {messageAlert.type === 'private' ? 'Private Message' : 'Broadcast Message'}
+              </span>
             </div>
-            <span className="font-bold text-textCol-primary">{privateMsgAlert.sender}</span>
-            <span className="text-textCol-secondary line-clamp-2 italic">"{privateMsgAlert.text}"</span>
+            <span className="font-bold text-textCol-primary">{messageAlert.sender}</span>
+            <span className="text-textCol-secondary line-clamp-2 italic">"{messageAlert.text}"</span>
           </motion.div>
         )}
       </AnimatePresence>

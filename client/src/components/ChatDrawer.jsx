@@ -134,17 +134,21 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
 
             return (
               <div key={msg._id || idx} className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
-                {/* Sender Tag / Private label */}
-                <div className="flex flex-col gap-0.5 mb-1 px-1">
+                {/* Sender Tag / Private or Broadcast label */}
+                <div className={`flex flex-col gap-0.5 mb-1 px-1 ${isOwn ? 'items-end' : 'items-start'}`}>
                   {!isOwn && (
                     <span className="text-[10px] text-textCol-muted font-semibold flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-greenAccent"></span>
                       {msg.sender?.displayName || 'Participant'}
                     </span>
                   )}
-                  {isPrivate && (
-                    <span className="inline-flex items-center gap-1 text-[8px] font-bold text-purple-400 uppercase tracking-wider">
-                      <Lock className="w-2.5 h-2.5" /> {privateInfoText}
+                  {isPrivate ? (
+                    <span className="inline-flex items-center gap-1 text-[8px] font-bold text-black uppercase tracking-wider">
+                      <Lock className="w-2 h-2 text-black" /> {privateInfoText}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[8px] font-bold text-black uppercase tracking-wider">
+                      Broadcast message
                     </span>
                   )}
                 </div>
@@ -173,13 +177,13 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
           <select
             value={recipientId}
             onChange={(e) => setRecipientId(e.target.value)}
-            className="bg-surface-card border border-borderCol hover:border-blueAccent/25 text-white text-[10px] font-semibold py-1.5 px-2 rounded-lg focus:outline-none cursor-pointer"
+            className="bg-white border border-borderCol hover:border-blueAccent/25 text-black text-[10px] font-semibold py-1.5 px-2 rounded-lg focus:outline-none cursor-pointer"
           >
-            <option value="">Everyone (Public)</option>
+            <option value="" className="text-black">Everyone (Broadcast)</option>
             {Object.keys(remoteStreams).map((socketId) => {
               const peer = remoteStreams[socketId];
               return (
-                <option key={peer.userId} value={peer.userId}>
+                <option key={peer.userId} value={peer.userId} className="text-black">
                   {peer.displayName} (Private)
                 </option>
               );
