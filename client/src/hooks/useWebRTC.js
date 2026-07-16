@@ -98,6 +98,24 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
     // A. Received list of all existing users in the room
     socket.on('all-users', async (users) => {
       console.log('Received list of existing peers in room:', users);
+      
+      // Pre-populate remoteStreams state with the existing peers' details
+      setRemoteStreams((prev) => {
+        const next = { ...prev };
+        for (const peer of users) {
+          next[peer.socketId] = {
+            stream: null,
+            userId: peer.userId,
+            displayName: peer.displayName,
+            isMuted: false,
+            isCameraOff: false,
+            isScreenSharing: false,
+            connectionStatus: 'stable'
+          };
+        }
+        return next;
+      });
+
       for (const peer of users) {
         const pc = createPeerConnection(peer.socketId, peer.displayName);
         pcsRef.current[peer.socketId] = pc;
@@ -414,7 +432,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
   };
 
   // Send a Chat Message
-  const sendChatMessage = (text) => {
+  const sendChatMessage = (text, recipientId = null) => {
     if (!text.trim()) return;
     
     // Broadcast via Socket.IO so it persists in MongoDB
@@ -422,6 +440,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
       roomId,
       senderId: userId,
       message: text,
+      recipientId,
     });
   };
 

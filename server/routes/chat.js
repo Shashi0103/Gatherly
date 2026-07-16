@@ -12,8 +12,16 @@ router.get('/:roomId', protect, async (req, res) => {
   try {
     const { roomId } = req.params;
     
-    // Fetch recent messages for room
-    const messages = await Message.find({ roomId })
+    // Fetch recent messages for room (filtered for public messages or private messages involving the current user)
+    const messages = await Message.find({
+      roomId,
+      $or: [
+        { recipientId: { $exists: false } },
+        { recipientId: null },
+        { recipientId: req.user.uid },
+        { senderId: req.user.uid }
+      ]
+    })
       .sort({ timestamp: 1 })
       .limit(100); // Limit to last 100 messages to prevent excessive load
 

@@ -86,14 +86,15 @@ const configureSockets = (io) => {
     });
 
     // 5. Chat Messaging
-    socket.on('chat-message', async ({ roomId, senderId, message }) => {
+    socket.on('chat-message', async ({ roomId, senderId, message, recipientId }) => {
       try {
-        console.log(`💬 Chat message in ${roomId} from ${senderId}: "${message}"`);
+        console.log(`💬 Chat message in ${roomId} from ${senderId} to ${recipientId || 'Everyone'}: "${message}"`);
         
         // Persist message to MongoDB
         const newMessage = await Message.create({
           roomId,
           senderId,
+          recipientId,
           message,
           timestamp: new Date()
         });
@@ -105,6 +106,7 @@ const configureSockets = (io) => {
           _id: newMessage._id,
           roomId,
           senderId,
+          recipientId,
           message,
           timestamp: newMessage.timestamp,
           sender: {
@@ -113,8 +115,24 @@ const configureSockets = (io) => {
           }
         };
 
-        // Broadcast message to everyone in the room (including sender for simplicity/acknowledgment)
-        io.to(roomId).emit('chat-message', messageData);
+        if (recipientId) {
+          // Send privately to the recipient and back to the sender
+          let recipientSocketId = null;
+          for (const [sId, conn] of activeConnections.entries()) {
+            if (conn.userId === recipientId && conn.roomId === roomId) {
+              recipientSocketId = sId;
+              break;
+            }
+          }
+          if (recipientSocketId) {
+            io.to(recipientSocketId).emit('chat-message', messageData);
+          }
+          // Send back to the sender socket so it's in their chat window too
+          socket.emit('chat-message', messageData);
+        } else {
+          // Broadcast message to everyone in the room
+          io.to(roomId).emit('chat-message', messageData);
+        }
       } catch (err) {
         console.error('Error handling chat-message socket event:', err.message);
       }

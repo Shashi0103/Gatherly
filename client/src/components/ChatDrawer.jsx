@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { X, Send, Smile, Paperclip, ExternalLink } from 'lucide-react';
+import { X, Send, Smile, Paperclip, ExternalLink, Lock } from 'lucide-react';
 import axios from 'axios';
 
-export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMessage, userId }) {
+export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMessage, userId, remoteStreams = {} }) {
   const [inputText, setInputText] = useState('');
+  const [recipientId, setRecipientId] = useState(''); // Empty string is Everyone
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
@@ -42,7 +43,7 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
     e.preventDefault();
     if (!inputText.trim()) return;
 
-    onSendMessage(inputText);
+    onSendMessage(inputText, recipientId || null);
     setInputText('');
   };
 
@@ -109,22 +110,47 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
         ) : (
           allMessages.map((msg, idx) => {
             const isOwn = msg.senderId === userId;
+            const isPrivate = !!msg.recipientId;
+            
+            // Determine display label for private messages
+            let privateInfoText = '';
+            if (isPrivate) {
+              if (isOwn) {
+                const match = Object.values(remoteStreams).find(p => p.userId === msg.recipientId);
+                const name = match ? match.displayName : 'Participant';
+                privateInfoText = `Private to ${name}`;
+              } else {
+                privateInfoText = 'Private message';
+              }
+            }
+
+            const bubbleClass = isOwn
+              ? (isPrivate 
+                  ? 'bg-purple-600 border border-purple-500/35 text-white rounded-tr-none shadow-md shadow-purple-900/10' 
+                  : 'bg-blueAccent text-white rounded-tr-none')
+              : (isPrivate 
+                  ? 'bg-purple-950/30 border border-purple-500/25 text-purple-200 rounded-tl-none' 
+                  : 'glass-panel !bg-surface-glass text-textCol-secondary rounded-tl-none');
+
             return (
               <div key={msg._id || idx} className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
-                {/* Sender Tag */}
-                {!isOwn && (
-                  <span className="text-[10px] text-textCol-muted mb-1 ml-1 font-semibold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-greenAccent"></span>
-                    {msg.sender?.displayName || 'Participant'}
-                  </span>
-                )}
+                {/* Sender Tag / Private label */}
+                <div className="flex flex-col gap-0.5 mb-1 px-1">
+                  {!isOwn && (
+                    <span className="text-[10px] text-textCol-muted font-semibold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-greenAccent"></span>
+                      {msg.sender?.displayName || 'Participant'}
+                    </span>
+                  )}
+                  {isPrivate && (
+                    <span className="inline-flex items-center gap-1 text-[8px] font-bold text-purple-400 uppercase tracking-wider">
+                      <Lock className="w-2.5 h-2.5" /> {privateInfoText}
+                    </span>
+                  )}
+                </div>
                 
                 {/* Bubble */}
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                  isOwn 
-                    ? 'bg-blueAccent text-white rounded-tr-none' 
-                    : 'glass-panel !bg-surface-glass text-textCol-secondary rounded-tl-none'
-                }`}>
+                <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${bubbleClass}`}>
                   <p className="break-words">{renderMessageContent(msg.message)}</p>
                   <span className={`block text-[9px] text-right mt-1 font-mono ${
                     isOwn ? 'text-white/60' : 'text-textCol-muted'
@@ -141,6 +167,26 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
 
       {/* Quick Emoji Bar & Input form */}
       <div className="p-4 border-t border-borderCol space-y-3 bg-bg-secondary/60">
+        {/* Recipient Selection Dropdown */}
+        <div className="flex items-center gap-2 px-2 text-[10px] text-textCol-secondary font-medium">
+          <span>Send to:</span>
+          <select
+            value={recipientId}
+            onChange={(e) => setRecipientId(e.target.value)}
+            className="bg-surface-card border border-borderCol hover:border-blueAccent/25 text-white text-[10px] font-semibold py-1.5 px-2 rounded-lg focus:outline-none cursor-pointer"
+          >
+            <option value="">Everyone (Public)</option>
+            {Object.keys(remoteStreams).map((socketId) => {
+              const peer = remoteStreams[socketId];
+              return (
+                <option key={peer.userId} value={peer.userId}>
+                  {peer.displayName} (Private)
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
         {/* Emoji list */}
         <div className="flex justify-between px-2">
           {['👍', '❤️', '😂', '😮', '👏', '🚀', '🔥'].map(emoji => (

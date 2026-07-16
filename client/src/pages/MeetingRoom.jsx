@@ -309,18 +309,34 @@ export default function MeetingRoom() {
   // Unread chat counter logic
   const prevMessagesLength = useRef(0);
   useEffect(() => {
-    if (!isChatOpen && chatMessages.length > prevMessagesLength.current) {
+    if (isChatOpen) {
+      setUnreadChatCount(0);
+    } else if (chatMessages.length > prevMessagesLength.current) {
       setUnreadChatCount(prev => prev + (chatMessages.length - prevMessagesLength.current));
     }
     prevMessagesLength.current = chatMessages.length;
   }, [chatMessages, isChatOpen]);
 
-  // Reset unread count when chat is opened
+  // Handle private message notifications
+  const [privateMsgAlert, setPrivateMsgAlert] = useState(null);
+  const prevMessagesRef = useRef([]);
   useEffect(() => {
-    if (isChatOpen) {
-      setUnreadChatCount(0);
+    if (chatMessages.length > prevMessagesRef.current.length) {
+      const latestMsg = chatMessages[chatMessages.length - 1];
+      const currentUserId = mongoUser?.uid || mongoUser?._id;
+      
+      // If it's a private message sent to us and not by us, trigger the toast
+      if (latestMsg && latestMsg.recipientId === currentUserId && latestMsg.senderId !== currentUserId) {
+        setPrivateMsgAlert({
+          sender: latestMsg.sender?.displayName || 'Participant',
+          text: latestMsg.message,
+        });
+        const timeoutId = setTimeout(() => setPrivateMsgAlert(null), 4000);
+        return () => clearTimeout(timeoutId);
+      }
     }
-  }, [isChatOpen]);
+    prevMessagesRef.current = chatMessages;
+  }, [chatMessages, mongoUser]);
 
   const handleCopyLink = () => {
     const fullUrl = `${window.location.origin}/meet/${roomId}`;
@@ -383,6 +399,25 @@ export default function MeetingRoom() {
           >
             <div className="w-2 h-2 rounded-full bg-greenAccent animate-pulse" />
             <span>{joinAlert}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Private Message Toast Notification */}
+      <AnimatePresence>
+        {privateMsgAlert && (
+          <motion.div
+            initial={{ opacity: 0, x: 50, y: 0 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="fixed top-24 right-6 z-50 py-3.5 px-5 rounded-2xl glass-panel bg-bg-secondary/95 border border-purple-500/30 text-white text-xs font-semibold shadow-2xl flex flex-col gap-1 max-w-[280px] backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />
+              <span className="text-purple-400 font-bold text-[9px] uppercase tracking-wider">Private Message</span>
+            </div>
+            <span className="font-bold text-textCol-primary">{privateMsgAlert.sender}</span>
+            <span className="text-textCol-secondary line-clamp-2 italic">"{privateMsgAlert.text}"</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -613,7 +648,7 @@ export default function MeetingRoom() {
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                    className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 border-2 border-bg-primary text-white rounded-full flex items-center justify-center text-[9px] font-bold px-1.5 shadow-md pointer-events-none"
+                    className="absolute -top-1.5 -right-1.5 z-30 min-w-[18px] h-4.5 bg-red-500 border border-bg-primary text-white rounded-full flex items-center justify-center text-[8px] font-bold px-1 shadow-md pointer-events-none animate-bounce"
                   >
                     {unreadChatCount}
                   </motion.span>
@@ -641,6 +676,7 @@ export default function MeetingRoom() {
         messages={chatMessages}
         onSendMessage={sendChatMessage}
         userId={mongoUser?.uid || mongoUser?._id}
+        remoteStreams={remoteStreams}
       />
 
       {/* WebM to MP4 Conversion loading overlay */}
