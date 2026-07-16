@@ -320,13 +320,28 @@ export default function MeetingRoom() {
   // Unread chat counter logic
   const prevMessagesLength = useRef(0);
   useEffect(() => {
+    console.log('💬 Unread counter check running:', {
+      isChatOpen,
+      chatMessagesLength: chatMessages.length,
+      prevMessagesLength: prevMessagesLength.current,
+      unreadChatCount
+    });
+
     if (isChatOpen) {
       setUnreadChatCount(0);
     } else if (chatMessages.length > prevMessagesLength.current) {
-      setUnreadChatCount(prev => prev + (chatMessages.length - prevMessagesLength.current));
+      const latestMsg = chatMessages[chatMessages.length - 1];
+      const currentUserId = mongoUser?.uid || mongoUser?._id;
+      
+      // Only increment unread count if the message is from another participant
+      if (latestMsg && latestMsg.senderId !== currentUserId) {
+        const diff = chatMessages.length - prevMessagesLength.current;
+        console.log(`🔴 Incrementing unread count by ${diff} for incoming message`);
+        setUnreadChatCount(prev => prev + diff);
+      }
     }
     prevMessagesLength.current = chatMessages.length;
-  }, [chatMessages, isChatOpen]);
+  }, [chatMessages, isChatOpen, mongoUser]);
 
   // Handle incoming chat notifications (private and broadcast)
   const [messageAlert, setMessageAlert] = useState(null);

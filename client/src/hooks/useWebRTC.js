@@ -218,6 +218,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
 
     // F. Received Chat message from signaling (fallback if data channel is opening)
     socket.on('chat-message', (msgObj) => {
+      console.log('Received chat message on client socket:', msgObj);
       setChatMessages((prev) => [...prev, msgObj]);
     });
 
