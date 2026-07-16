@@ -23,6 +23,8 @@ export default function MeetingRoom() {
   const [copied, setCopied] = useState(false);
   const [meetingError, setMeetingError] = useState('');
   const [pinnedUser, setPinnedUser] = useState(null);
+  const [meetingHostId, setMeetingHostId] = useState('');
+  const [joinAlert, setJoinAlert] = useState('');
 
   // Hook up WebRTC Signaling
   const {
@@ -34,11 +36,18 @@ export default function MeetingRoom() {
     chatMessages,
     speakingUsers,
     micLevels,
+    isKicked,
+    adminMuteUser,
+    adminStopVideo,
+    adminKickUser,
     toggleMute,
     toggleCamera,
     toggleScreenShare,
     sendChatMessage,
-  } = useWebRTC(roomId, mongoUser?.uid || mongoUser?._id, mongoUser?.displayName);
+  } = useWebRTC(roomId, mongoUser?.uid || mongoUser?._id, mongoUser?.displayName, (peerName) => {
+    setJoinAlert(`${peerName} joined the meeting`);
+    setTimeout(() => setJoinAlert(''), 3000);
+  });
 
   // Hook up Canvas + Web Audio API recorder
   const {
@@ -71,6 +80,10 @@ export default function MeetingRoom() {
   const renderVideoCard = (id, stream, displayName, isMuted, isCameraOff, isScreenSharing, isLocal, isSmall = false) => {
     const isSpeaking = speakingUsers[id];
     const isPinned = pinnedUser === id;
+    const isParticipantAdmin = (id === 'local'
+      ? (mongoUser?.uid === meetingHostId || mongoUser?._id === meetingHostId)
+      : (remoteStreams[id]?.userId === meetingHostId));
+    const isCurrentUserAdmin = (mongoUser?.uid === meetingHostId || mongoUser?._id === meetingHostId);
     
     return (
       <div
@@ -113,6 +126,11 @@ export default function MeetingRoom() {
             <span className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-white font-semibold line-clamp-1`}>
               {displayName} {isScreenSharing && ' (Sharing)'}
             </span>
+            {isParticipantAdmin && (
+              <span className="py-0.5 px-1.5 rounded bg-blueAccent/25 border border-blueAccent/30 text-blueAccent-light text-[9px] font-bold uppercase tracking-wider shrink-0">
+                Admin
+              </span>
+            )}
             {/* Live Mic Level Equalizer Feed */}
             {!isMuted && (micLevels[id] || 0) > 0 && (
               <div className="flex items-end gap-[2px] h-3.5 shrink-0 px-0.5">
@@ -145,6 +163,40 @@ export default function MeetingRoom() {
           {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
         </button>
 
+        {/* Admin Controls Overlay */}
+        {isCurrentUserAdmin && !isLocal && (
+          <div className="absolute top-2.5 right-11 z-20 flex items-center gap-1 bg-black/60 border border-white/10 p-1 rounded-xl backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              type="button"
+              onClick={() => adminMuteUser(id)}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-white/80 hover:text-red-400 transition-all cursor-pointer"
+              title="Mute Participant mic"
+            >
+              <MicOff className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => adminStopVideo(id)}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-white/80 hover:text-red-400 transition-all cursor-pointer"
+              title="Stop Participant video"
+            >
+              <VideoOff className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm(`Are you sure you want to remove ${displayName} from the meeting?`)) {
+                  adminKickUser(id);
+                }
+              }}
+              className="p-1.5 rounded-lg hover:bg-red-500/20 text-white/80 hover:text-red-400 transition-all cursor-pointer"
+              title="Remove Participant"
+            >
+              <PhoneOff className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* Status Badges (Bottom) */}
         <div className="z-10 p-2.5 self-end flex gap-2">
           {isMuted && (
@@ -164,6 +216,7 @@ export default function MeetingRoom() {
       try {
         const response = await axios.get(`/api/meetings/link/${roomId}`);
         setMeetingTitle(response.data.title);
+        setMeetingHostId(response.data.hostId);
         
         // Auto-end instant meetings after 1.5 hours (90 minutes)
         const isInstant = response.data.title?.startsWith('Instant Meeting');
@@ -191,6 +244,13 @@ export default function MeetingRoom() {
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [roomId]);
+
+  // Handle kicked notification
+  useEffect(() => {
+    if (isKicked) {
+      setMeetingError('You have been removed from the meeting by the administrator.');
+    }
+  }, [isKicked]);
 
   // Auto-pin screen sharing
   useEffect(() => {
@@ -282,6 +342,21 @@ export default function MeetingRoom() {
 
   return (
     <div className="h-screen w-screen bg-bg-primary overflow-hidden relative flex flex-col justify-between pt-4 px-4 pb-2.5 text-textCol-primary selection:bg-greenAccent/20">
+      
+      {/* Participant Join Toast Notification */}
+      <AnimatePresence>
+        {joinAlert && (
+          <motion.div
+            initial={{ opacity: 0, x: 50, y: 0 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="fixed top-6 right-6 z-50 py-3 px-5 rounded-glass bg-bg-secondary border border-greenAccent/30 text-white text-xs font-semibold shadow-2xl flex items-center gap-2"
+          >
+            <div className="w-2 h-2 rounded-full bg-greenAccent animate-pulse" />
+            <span>{joinAlert}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Top Header Row */}
       <header className="z-10 flex items-center justify-between px-4 py-3 glass-panel !bg-surface-glass !rounded-xl">

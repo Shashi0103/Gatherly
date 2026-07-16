@@ -11,7 +11,7 @@ const ICE_SERVERS = {
   ],
 };
 
-export const useWebRTC = (roomId, userId, displayName) => {
+export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState({});
   const [isMuted, setIsMuted] = useState(false);
@@ -20,6 +20,7 @@ export const useWebRTC = (roomId, userId, displayName) => {
   const [chatMessages, setChatMessages] = useState([]);
   const [speakingUsers, setSpeakingUsers] = useState({});
   const [micLevels, setMicLevels] = useState({});
+  const [isKicked, setIsKicked] = useState(false);
 
   const socketRef = useRef(null);
   const pcsRef = useRef({}); // socketId -> RTCPeerConnection
@@ -126,6 +127,9 @@ export const useWebRTC = (roomId, userId, displayName) => {
     // B. Received Join Broadcast from a new peer
     socket.on('user-joined', ({ socketId, userId: peerUserId, displayName: peerName }) => {
       console.log(`New peer joined: ${peerName} (${socketId})`);
+      if (onUserJoined) {
+        onUserJoined(peerName);
+      }
       // We wait for them to send us an offer, but we keep remote state mapped
       setRemoteStreams((prev) => ({
         ...prev,
@@ -223,6 +227,53 @@ export const useWebRTC = (roomId, userId, displayName) => {
           [socketId]: { ...prev[socketId], isScreenSharing: false }
         };
       });
+    });
+
+    // Admin Control Signals
+    socket.on('admin-mute', () => {
+      console.log('Received admin force-mute command.');
+      if (localStreamRef.current) {
+        localStreamRef.current.getAudioTracks().forEach((track) => {
+          track.enabled = false;
+        });
+      }
+      setIsMuted(true);
+
+      const currentCameraOff = localStreamRef.current
+        ? localStreamRef.current.getVideoTracks().every((track) => !track.enabled)
+        : false;
+
+      broadcastEncryptedData({
+        type: 'state-sync',
+        isMuted: true,
+        isCameraOff: currentCameraOff,
+      });
+    });
+
+    socket.on('admin-stop-video', () => {
+      console.log('Received admin force-stop-video command.');
+      if (localStreamRef.current) {
+        localStreamRef.current.getVideoTracks().forEach((track) => {
+          track.enabled = false;
+        });
+      }
+      setIsCameraOff(true);
+
+      const currentMuted = localStreamRef.current
+        ? localStreamRef.current.getAudioTracks().every((track) => !track.enabled)
+        : false;
+
+      broadcastEncryptedData({
+        type: 'state-sync',
+        isMuted: currentMuted,
+        isCameraOff: true,
+      });
+    });
+
+    socket.on('admin-kick', () => {
+      console.log('Received admin kick command.');
+      setIsKicked(true);
+      cleanupCall();
     });
   };
 
@@ -603,6 +654,24 @@ export const useWebRTC = (roomId, userId, displayName) => {
     }
   };
 
+  const adminMuteUser = (targetSocketId) => {
+    if (socketRef.current) {
+      socketRef.current.emit('admin-mute-user', { roomId, targetSocketId });
+    }
+  };
+
+  const adminStopVideo = (targetSocketId) => {
+    if (socketRef.current) {
+      socketRef.current.emit('admin-stop-video', { roomId, targetSocketId });
+    }
+  };
+
+  const adminKickUser = (targetSocketId) => {
+    if (socketRef.current) {
+      socketRef.current.emit('admin-kick-user', { roomId, targetSocketId });
+    }
+  };
+
   return {
     localStream,
     remoteStreams,
@@ -612,6 +681,10 @@ export const useWebRTC = (roomId, userId, displayName) => {
     chatMessages,
     speakingUsers,
     micLevels,
+    isKicked,
+    adminMuteUser,
+    adminStopVideo,
+    adminKickUser,
     toggleMute,
     toggleCamera,
     toggleScreenShare,

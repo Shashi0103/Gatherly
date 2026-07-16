@@ -148,7 +148,23 @@ const configureSockets = (io) => {
       socket.join(`user-${userId}`);
     });
 
-    // 9. Explicit Leave Room
+    // 9. Admin Control Relays
+    socket.on('admin-mute-user', ({ roomId, targetSocketId }) => {
+      console.log(`🛡️ Admin ${socket.id} muting target ${targetSocketId} in room ${roomId}`);
+      io.to(targetSocketId).emit('admin-mute');
+    });
+
+    socket.on('admin-stop-video', ({ roomId, targetSocketId }) => {
+      console.log(`🛡️ Admin ${socket.id} stopping video for target ${targetSocketId} in room ${roomId}`);
+      io.to(targetSocketId).emit('admin-stop-video');
+    });
+
+    socket.on('admin-kick-user', ({ roomId, targetSocketId }) => {
+      console.log(`🛡️ Admin ${socket.id} kicking target ${targetSocketId} in room ${roomId}`);
+      io.to(targetSocketId).emit('admin-kick');
+    });
+
+    // 10. Explicit Leave Room
     socket.on('leave-room', () => {
       handleDisconnect(socket);
     });
