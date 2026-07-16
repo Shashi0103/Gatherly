@@ -25,6 +25,7 @@ export default function MeetingRoom() {
   const [pinnedUser, setPinnedUser] = useState(null);
   const [meetingHostId, setMeetingHostId] = useState('');
   const [joinAlert, setJoinAlert] = useState('');
+  const [isLocalNetworkUnstable, setIsLocalNetworkUnstable] = useState(!navigator.onLine);
 
   // Hook up WebRTC Signaling
   const {
@@ -84,6 +85,7 @@ export default function MeetingRoom() {
       ? (mongoUser?.uid === meetingHostId || mongoUser?._id === meetingHostId)
       : (remoteStreams[id]?.userId === meetingHostId));
     const isCurrentUserAdmin = (mongoUser?.uid === meetingHostId || mongoUser?._id === meetingHostId);
+    const isUnstable = id === 'local' ? isLocalNetworkUnstable : (remoteStreams[id]?.connectionStatus === 'unstable');
     
     return (
       <div
@@ -205,6 +207,19 @@ export default function MeetingRoom() {
             </span>
           )}
         </div>
+
+        {/* Unstable Connection Overlay Indicator */}
+        {isUnstable && (
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-md z-30 flex flex-col items-center justify-center gap-3 text-center p-4 rounded-2xl">
+            <div className="w-12 h-12 rounded-full bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-yellow-400">
+              <AlertCircle className="w-6 h-6 animate-pulse" />
+            </div>
+            <span className="text-xs text-yellow-400 font-bold tracking-wide uppercase">Unstable Connection</span>
+            <span className="text-[10px] text-textCol-muted max-w-[200px] leading-relaxed">
+              Participant is facing poor internet speed or connectivity issues.
+            </span>
+          </div>
+        )}
       </div>
     );
   };
@@ -251,6 +266,20 @@ export default function MeetingRoom() {
       setMeetingError('You have been removed from the meeting by the administrator.');
     }
   }, [isKicked]);
+
+  // Handle local internet speed / network connectivity status
+  useEffect(() => {
+    const handleOnline = () => setIsLocalNetworkUnstable(false);
+    const handleOffline = () => setIsLocalNetworkUnstable(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Auto-pin screen sharing
   useEffect(() => {

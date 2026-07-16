@@ -139,7 +139,8 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
           displayName: peerName,
           isMuted: false,
           isCameraOff: false,
-          isScreenSharing: false
+          isScreenSharing: false,
+          connectionStatus: 'stable'
         }
       }));
     });
@@ -304,6 +305,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
             ...existing,
             stream: remoteStream,
             displayName: existing.displayName || peerName,
+            connectionStatus: existing.connectionStatus || 'stable'
           },
         };
       });
@@ -313,8 +315,25 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
     };
 
     pc.onconnectionstatechange = () => {
-      console.log(`Connection state change for ${socketId}: ${pc.connectionState}`);
-      if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+      const state = pc.connectionState;
+      console.log(`Connection state change for ${socketId}: ${state}`);
+      if (state === 'disconnected') {
+        setRemoteStreams((prev) => {
+          if (!prev[socketId]) return prev;
+          return {
+            ...prev,
+            [socketId]: { ...prev[socketId], connectionStatus: 'unstable' }
+          };
+        });
+      } else if (state === 'connected' || state === 'completed') {
+        setRemoteStreams((prev) => {
+          if (!prev[socketId]) return prev;
+          return {
+            ...prev,
+            [socketId]: { ...prev[socketId], connectionStatus: 'stable' }
+          };
+        });
+      } else if (state === 'failed') {
         closePeer(socketId);
       }
     };
