@@ -54,6 +54,14 @@ router.post('/', protect, async (req, res) => {
       participants,
     });
 
+    // Notify participants in real-time
+    const io = req.app.get('io');
+    if (io) {
+      participants.forEach((pId) => {
+        io.to(`user-${pId}`).emit('meetings-updated');
+      });
+    }
+
     res.status(201).json(meeting);
   } catch (error) {
     console.error('Error creating meeting:', error.message);
@@ -162,7 +170,18 @@ router.delete('/:id', protect, async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to delete this meeting' });
     }
 
+    const participants = meeting.participants || [];
+
     await Meeting.deleteOne({ _id: req.params.id });
+
+    // Notify participants in real-time
+    const io = req.app.get('io');
+    if (io) {
+      participants.forEach((pId) => {
+        io.to(`user-${pId}`).emit('meetings-updated');
+      });
+    }
+
     res.status(200).json({ message: 'Meeting deleted successfully' });
   } catch (error) {
     console.error('Error deleting meeting:', error.message);

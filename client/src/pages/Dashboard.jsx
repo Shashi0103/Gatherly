@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Video, Calendar, Plus, Link as LinkIcon, Trash2, Users, Clock, Play, Search, Activity, Sparkles, Check } from 'lucide-react';
@@ -51,6 +52,27 @@ export default function Dashboard() {
   useEffect(() => {
     fetchMeetings();
   }, []);
+
+  useEffect(() => {
+    if (!mongoUser?.uid) return;
+
+    const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const socket = io(serverUrl);
+
+    socket.on('connect', () => {
+      console.log('Dashboard socket connected, registering user:', mongoUser.uid);
+      socket.emit('register-user', { userId: mongoUser.uid });
+    });
+
+    socket.on('meetings-updated', () => {
+      console.log('Real-time meeting update received! Re-fetching...');
+      fetchMeetings();
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [mongoUser]);
 
   const handleCreateInstant = async () => {
     try {

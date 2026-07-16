@@ -36,6 +36,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+app.set('io', io);
 
 // Middleware
 // Disable contentSecurityPolicy to prevent blocking Vite hot-reloader and inline media

@@ -192,6 +192,29 @@ export default function MeetingRoom() {
     };
   }, [roomId]);
 
+  // Auto-pin screen sharing
+  useEffect(() => {
+    // 1. Check if local user is screen sharing
+    if (isScreenSharing) {
+      setPinnedUser('local');
+      return;
+    }
+
+    // 2. Check if any remote peer is screen sharing
+    const sharingPeerId = Object.keys(remoteStreams).find(
+      (socketId) => remoteStreams[socketId].isScreenSharing
+    );
+
+    if (sharingPeerId) {
+      setPinnedUser(sharingPeerId);
+    } else {
+      // If the current pinned user was screen sharing, but they stopped, unpin them
+      if (pinnedUser && (pinnedUser === 'local' ? !isScreenSharing : !remoteStreams[pinnedUser]?.isScreenSharing)) {
+        setPinnedUser(null);
+      }
+    }
+  }, [remoteStreams, isScreenSharing, pinnedUser]);
+
 
 
   // Unread chat counter logic
@@ -486,7 +509,7 @@ export default function MeetingRoom() {
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                    className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-blueAccent border-2 border-bg-primary text-white rounded-full flex items-center justify-center text-[9px] font-bold px-1.5 shadow-md pointer-events-none"
+                    className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 border-2 border-bg-primary text-white rounded-full flex items-center justify-center text-[9px] font-bold px-1.5 shadow-md pointer-events-none"
                   >
                     {unreadChatCount}
                   </motion.span>

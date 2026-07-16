@@ -142,7 +142,13 @@ const configureSockets = (io) => {
       socket.to(roomId).emit('recording-stop');
     });
 
-    // 8. Explicit Leave Room
+    // 8. User Global Registration (for real-time dashboard updates)
+    socket.on('register-user', ({ userId }) => {
+      console.log(`User ${userId} registered socket ${socket.id}`);
+      socket.join(`user-${userId}`);
+    });
+
+    // 9. Explicit Leave Room
     socket.on('leave-room', () => {
       handleDisconnect(socket);
     });
