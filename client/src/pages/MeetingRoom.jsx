@@ -156,7 +156,10 @@ export default function MeetingRoom() {
         {/* Pin Control Button */}
         <button
           type="button"
-          onClick={() => setPinnedUser(isPinned ? null : id)}
+          onClick={() => {
+            wasAutoPinnedRef.current = false;
+            setPinnedUser(isPinned ? null : id);
+          }}
           className={`absolute top-2.5 right-2.5 z-20 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all cursor-pointer ${
             isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100'
           }`}
@@ -282,10 +285,14 @@ export default function MeetingRoom() {
   }, []);
 
   // Auto-pin screen sharing
+  const wasAutoPinnedRef = useRef(false);
   useEffect(() => {
     // 1. Check if local user is screen sharing
     if (isScreenSharing) {
-      setPinnedUser('local');
+      if (pinnedUser !== 'local') {
+        setPinnedUser('local');
+        wasAutoPinnedRef.current = true;
+      }
       return;
     }
 
@@ -295,11 +302,15 @@ export default function MeetingRoom() {
     );
 
     if (sharingPeerId) {
-      setPinnedUser(sharingPeerId);
+      if (pinnedUser !== sharingPeerId) {
+        setPinnedUser(sharingPeerId);
+        wasAutoPinnedRef.current = true;
+      }
     } else {
-      // If the current pinned user was screen sharing, but they stopped, unpin them
-      if (pinnedUser && (pinnedUser === 'local' ? !isScreenSharing : !remoteStreams[pinnedUser]?.isScreenSharing)) {
+      // If the current pinned user was screen sharing, but they stopped, and they were auto-pinned, unpin them
+      if (wasAutoPinnedRef.current) {
         setPinnedUser(null);
+        wasAutoPinnedRef.current = false;
       }
     }
   }, [remoteStreams, isScreenSharing, pinnedUser]);

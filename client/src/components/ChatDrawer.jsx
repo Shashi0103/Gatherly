@@ -84,7 +84,7 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
       initial={{ x: '100%' }}
       animate={{ x: isOpen ? 0 : '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed right-0 top-0 bottom-0 w-96 bg-bg-secondary/95 backdrop-blur-xl border-l border-borderCol z-40 flex flex-col justify-between shadow-2xl"
+      className="fixed right-0 top-0 bottom-0 w-96 bg-bg-secondary/95 backdrop-blur-xl border-l border-borderCol z-40 flex flex-col min-h-0 shadow-2xl"
     >
       {/* Header */}
       <div className="p-5 border-b border-borderCol flex items-center justify-between">
@@ -98,7 +98,7 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
       </div>
 
       {/* Messages Window */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
+      <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
         {loading ? (
           <div className="text-center text-textCol-muted text-xs py-8">
             Loading message logs...
@@ -135,20 +135,20 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
             return (
               <div key={msg._id || idx} className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
                 {/* Sender Tag / Private or Broadcast label */}
-                <div className={`flex flex-col gap-0.5 mb-1 px-1 ${isOwn ? 'items-end' : 'items-start'}`}>
+                <div className={`flex flex-col gap-1.5 mb-1 px-1 ${isOwn ? 'items-end' : 'items-start'}`}>
                   {!isOwn && (
-                    <span className="text-[10px] text-textCol-muted font-semibold flex items-center gap-1">
+                    <span className="text-xs text-white font-bold flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-greenAccent"></span>
                       {msg.sender?.displayName || 'Participant'}
                     </span>
                   )}
                   {isPrivate ? (
-                    <span className="inline-flex items-center gap-1 text-[8px] font-bold text-black uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-1 text-[8px] font-bold bg-white text-black px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow">
                       <Lock className="w-2 h-2 text-black" /> {privateInfoText}
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[8px] font-bold text-black uppercase tracking-wider">
-                      Broadcast message
+                    <span className="inline-flex items-center gap-1 text-[8px] font-bold bg-white text-black px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow">
+                      Broadcast
                     </span>
                   )}
                 </div>
