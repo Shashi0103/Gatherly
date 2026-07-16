@@ -511,85 +511,85 @@ export default function MeetingRoom() {
         )}
 
         {/* Floating Control Bar Overlayed */}
-        <footer className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center">
-          <div className="flex items-center justify-center gap-4">
+        <footer className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center">
+          <div className="flex items-center justify-center gap-2 md:gap-4">
             {/* Mic Toggle Button */}
             <button
               onClick={toggleMute}
-              className={`w-12 h-12 rounded-full border backdrop-blur-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer ${
+              className={`w-10 h-10 md:w-12 md:h-12 rounded-full border backdrop-blur-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer ${
                 isMuted 
                   ? 'bg-red-500/25 border-red-500/30 text-red-400 hover:bg-red-500/35' 
                   : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
               }`}
               title={isMuted ? 'Unmute microphone' : 'Mute microphone'}
             >
-              {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              {isMuted ? <MicOff className="w-4.5 h-4.5 md:w-5 md:h-5" /> : <Mic className="w-4.5 h-4.5 md:w-5 md:h-5" />}
             </button>
 
             {/* Camera Toggle Button */}
             <button
               onClick={toggleCamera}
-              className={`w-12 h-12 rounded-full border backdrop-blur-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer ${
+              className={`w-10 h-10 md:w-12 md:h-12 rounded-full border backdrop-blur-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer ${
                 isCameraOff 
                   ? 'bg-red-500/25 border-red-500/30 text-red-400 hover:bg-red-500/35' 
                   : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
               }`}
               title={isCameraOff ? 'Turn on camera' : 'Turn off camera'}
             >
-              {isCameraOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+              {isCameraOff ? <VideoOff className="w-4.5 h-4.5 md:w-5 md:h-5" /> : <Video className="w-4.5 h-4.5 md:w-5 md:h-5" />}
             </button>
 
             {/* Screen Share Button */}
             <button
               onClick={toggleScreenShare}
-              className={`w-12 h-12 rounded-full border backdrop-blur-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer ${
+              className={`w-10 h-10 md:w-12 md:h-12 rounded-full border backdrop-blur-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer ${
                 isScreenSharing 
                   ? 'bg-green-500/25 border-green-500/35 text-green-400 hover:bg-green-500/35' 
                   : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
               }`}
               title={isScreenSharing ? 'Stop screen sharing' : 'Share your screen'}
             >
-              <Monitor className="w-5 h-5" />
+              <Monitor className="w-4.5 h-4.5 md:w-5 md:h-5" />
             </button>
 
             {/* Separator Line */}
-            <span className="w-[1px] h-8 bg-white/25 self-center"></span>
+            <span className="w-[1px] h-6 md:h-8 bg-white/25 self-center"></span>
 
             {/* Recording Button / Controls */}
             {!isRecording ? (
               <button
                 onClick={startRecording}
-                className="w-12 h-12 rounded-full bg-white/10 border border-white/20 backdrop-blur-xl hover:bg-red-500/25 hover:border-red-500/30 text-white hover:text-red-400 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 border border-white/20 backdrop-blur-xl hover:bg-red-500/25 hover:border-red-500/30 text-white hover:text-red-400 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
                 title="Record Meeting"
               >
-                <Radio className="w-5 h-5" />
+                <Radio className="w-4.5 h-4.5 md:w-5 md:h-5" />
               </button>
             ) : (
-              <div className="flex gap-2 bg-black/45 backdrop-blur-xl p-1 rounded-full border border-white/15 shadow-lg items-center justify-center">
+              <div className="flex gap-1 md:gap-2 bg-black/45 backdrop-blur-xl p-1 rounded-full border border-white/15 shadow-lg items-center justify-center">
                 {isPaused ? (
                   <button
                     onClick={resumeRecording}
-                    className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 text-greenAccent flex items-center justify-center transition-all active:scale-90 cursor-pointer"
+                    className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white/15 hover:bg-white/25 text-greenAccent flex items-center justify-center transition-all active:scale-90 cursor-pointer"
                     title="Resume Recording"
                   >
-                    <Play className="w-4 h-4 fill-greenAccent" />
+                    <Play className="w-3.5 h-3.5 md:w-4 md:h-4 fill-greenAccent" />
                   </button>
                 ) : (
                   <button
                     onClick={pauseRecording}
-                    className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 text-yellow-400 flex items-center justify-center transition-all active:scale-90 cursor-pointer"
+                    className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white/15 hover:bg-white/25 text-yellow-400 flex items-center justify-center transition-all active:scale-90 cursor-pointer"
                     title="Pause Recording"
                   >
-                    <Pause className="w-4 h-4" />
+                    <Pause className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   </button>
                 )}
 
                 <button
                   onClick={stopRecording}
-                  className="w-9 h-9 rounded-full bg-red-600/35 hover:bg-red-600/50 border border-red-500/35 text-white flex items-center justify-center transition-all active:scale-90 cursor-pointer"
+                  className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-red-600/35 hover:bg-red-600/50 border border-red-500/35 text-white flex items-center justify-center transition-all active:scale-90 cursor-pointer"
                   title="Stop & Save Recording"
                 >
-                  <Square className="w-4 h-4 fill-white text-white" />
+                  <Square className="w-3.5 h-3.5 md:w-4 md:h-4 fill-white text-white" />
                 </button>
               </div>
             )}
@@ -597,14 +597,14 @@ export default function MeetingRoom() {
             {/* Chat Drawer Toggle Button */}
             <button
               onClick={() => setIsChatOpen(!isChatOpen)}
-              className={`w-12 h-12 rounded-full border backdrop-blur-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer relative ${
+              className={`w-10 h-10 md:w-12 md:h-12 rounded-full border backdrop-blur-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer relative ${
                 isChatOpen 
                   ? 'bg-blue-500/25 border-blue-500/30 text-blue-400' 
                   : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
               }`}
               title="Chat Drawer"
             >
-              <MessageSquare className="w-5 h-5" />
+              <MessageSquare className="w-4.5 h-4.5 md:w-5 md:h-5" />
               <AnimatePresence>
                 {unreadChatCount > 0 && (
                   <motion.span
@@ -624,10 +624,10 @@ export default function MeetingRoom() {
             {/* Leave Call Button */}
             <button
               onClick={handleLeave}
-              className="w-12 h-12 rounded-full bg-red-600/25 border border-red-500/40 backdrop-blur-xl hover:bg-red-600/45 text-red-200 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
+              className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-600/25 border border-red-500/40 backdrop-blur-xl hover:bg-red-600/45 text-red-200 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
               title="Leave Call"
             >
-              <PhoneOff className="w-5 h-5" />
+              <PhoneOff className="w-4.5 h-4.5 md:w-5 md:h-5" />
             </button>
           </div>
         </footer>

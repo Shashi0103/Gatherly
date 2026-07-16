@@ -150,7 +150,7 @@ export default function Dashboard() {
       <Sidebar />
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto h-screen p-8 pr-12 relative">
+      <main className="flex-1 overflow-y-auto h-screen p-4 md:p-8 md:pr-12 pb-24 md:pb-8 relative">
         {/* Alerts notifications */}
         <AnimatePresence>
 

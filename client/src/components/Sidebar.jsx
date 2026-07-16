@@ -39,7 +39,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="w-64 glass-panel !h-[calc(100vh-2rem)] flex flex-col justify-between p-6 bg-bg-secondary/40 shrink-0 sticky top-4 left-4 m-4">
+      <aside className="hidden md:flex w-64 glass-panel !h-[calc(100vh-2rem)] flex flex-col justify-between p-6 bg-bg-secondary/40 shrink-0 sticky top-4 left-4 m-4">
         {/* Brand & Logo */}
         <div className="space-y-8">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
@@ -135,6 +135,41 @@ export default function Sidebar() {
           </div>
         </div>
       </aside>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="fixed bottom-4 left-4 right-4 z-40 h-16 rounded-2xl glass-panel bg-bg-secondary/90 border border-white/10 flex items-center justify-around px-4 md:hidden backdrop-blur-xl shadow-lg">
+        {navItems.map((item) => {
+          const isActive = window.location.pathname === item.to;
+          return (
+            <button
+              key={item.to}
+              onClick={() => navigate(item.to)}
+              className={`p-2 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                isActive ? 'text-blueAccent' : 'text-textCol-secondary hover:text-textCol-primary'
+              }`}
+            >
+              {item.icon}
+              <span className="text-[9px] font-bold tracking-wide">{item.label}</span>
+            </button>
+          );
+        })}
+        
+        <button
+          onClick={() => setIsProfileOpen(true)}
+          className="p-2 rounded-xl flex flex-col items-center justify-center gap-0.5 text-textCol-secondary hover:text-textCol-primary transition-all cursor-pointer"
+        >
+          <Settings className="w-5 h-5" />
+          <span className="text-[9px] font-bold tracking-wide">Profile</span>
+        </button>
+
+        <button
+          onClick={handleLogout}
+          className="p-2 rounded-xl flex flex-col items-center justify-center gap-0.5 text-red-400 hover:text-red-300 transition-all cursor-pointer"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="text-[9px] font-bold tracking-wide">Sign Out</span>
+        </button>
+      </div>
 
       {/* Profile Editing Settings Modal */}
       <ProfileModal
