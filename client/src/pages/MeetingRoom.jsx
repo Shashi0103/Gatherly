@@ -98,7 +98,9 @@ export default function MeetingRoom() {
     const isUnstable = id === 'local' ? isLocalNetworkUnstable : (remoteStreams[id]?.connectionStatus === 'unstable');
     
     const cardClass = isSmall
-      ? 'w-full shrink-0 border-borderCol rounded-2xl border aspect-video shadow-lg'
+      ? (isMobile
+          ? 'w-full h-full border-borderCol rounded-2xl border !aspect-auto shadow-lg'
+          : 'w-full shrink-0 border-borderCol rounded-2xl border aspect-video shadow-lg')
       : (isMobile && !pinnedUser
           ? 'w-full h-full !aspect-auto !rounded-none !border-0'
           : 'w-full h-full rounded-2xl border aspect-video shadow-lg');
@@ -409,8 +411,12 @@ export default function MeetingRoom() {
     return `${m}:${s}`;
   };
 
-  const getGridClass = () => {
-    const total = 1 + Object.keys(remoteStreams).length;
+  const totalParticipants = 1 + Object.keys(remoteStreams).length;
+  const mainGridRemotes = Object.keys(remoteStreams).slice(0, 4);
+  const sidebarRemotes = Object.keys(remoteStreams).slice(4);
+
+  const getGridClass = (overrideCount = null) => {
+    const total = overrideCount !== null ? overrideCount : (1 + Object.keys(remoteStreams).length);
     if (isMobile) {
       if (total === 1) return 'w-full h-full !p-0 !gap-0 grid-cols-1 grid-rows-1';
       if (total === 2) return 'w-full h-full !p-0 !gap-0 grid-cols-1 grid-rows-2';
@@ -517,35 +523,140 @@ export default function MeetingRoom() {
         isMobile && !pinnedUser ? 'p-0' : 'p-6'
       }`}>
         {!pinnedUser ? (
-          /* Standard Grid Layout */
-          <div className={`grid w-full h-full ${
-            isMobile ? 'justify-stretch items-stretch' : 'gap-5 justify-center content-center'
-          } ${getGridClass()}`}>
-            {/* 1. Local Video Card */}
-            {renderVideoCard(
-              'local',
-              localStream,
-              mongoUser?.displayName || 'You',
-              isMuted,
-              isCameraOff,
-              isScreenSharing,
-              true
-            )}
+          totalParticipants <= 4 ? (
+            /* Standard Grid Layout for <= 4 participants */
+            <div className={`grid w-full h-full ${
+              isMobile ? 'justify-stretch items-stretch' : 'gap-5 justify-center content-center'
+            } ${getGridClass()}`}>
+              {/* 1. Local Video Card */}
+              {renderVideoCard(
+                'local',
+                localStream,
+                mongoUser?.displayName || 'You',
+                isMuted,
+                isCameraOff,
+                isScreenSharing,
+                true
+              )}
 
-            {/* 2. Remote Video Cards */}
-            {Object.keys(remoteStreams).map((socketId) => {
-              const peer = remoteStreams[socketId];
-              return renderVideoCard(
-                socketId,
-                peer.stream,
-                peer.displayName || 'Participant',
-                peer.isMuted,
-                peer.isCameraOff || !peer.stream,
-                peer.isScreenSharing,
-                false
-              );
-            })}
-          </div>
+              {/* 2. Remote Video Cards */}
+              {Object.keys(remoteStreams).map((socketId) => {
+                const peer = remoteStreams[socketId];
+                return renderVideoCard(
+                  socketId,
+                  peer.stream,
+                  peer.displayName || 'Participant',
+                  peer.isMuted,
+                  peer.isCameraOff || !peer.stream,
+                  peer.isScreenSharing,
+                  false
+                );
+              })}
+            </div>
+          ) : (
+            /* Split layout for > 4 participants (5 to 10) */
+            <div className={`flex w-full h-full gap-5 overflow-hidden ${
+              isMobile ? 'flex-col justify-end' : 'flex-row justify-center items-center'
+            }`}>
+              {/* Main Grid: holds the first 4 remote participants */}
+              <div className="flex-1 min-w-0 min-h-0 w-full">
+                <div className={`grid w-full h-full ${
+                  isMobile ? 'justify-stretch items-stretch' : 'gap-5 justify-center content-center'
+                } ${getGridClass(mainGridRemotes.length)}`}>
+                  {mainGridRemotes.map((socketId) => {
+                    const peer = remoteStreams[socketId];
+                    return renderVideoCard(
+                      socketId,
+                      peer.stream,
+                      peer.displayName || 'Participant',
+                      peer.isMuted,
+                      peer.isCameraOff || !peer.stream,
+                      peer.isScreenSharing,
+                      false
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Sidebar/Mini-feed: holds the local user (at the top/left) and remaining remote participants */}
+              {isMobile ? (
+                /* Horizontal Scroll panel for Mobile Smartphones */
+                <div className="w-full h-28 shrink-0 flex flex-col gap-1 overflow-hidden bg-bg-secondary/40 border border-white/10 p-2 rounded-2xl backdrop-blur-md">
+                  <span className="text-[8px] text-textCol-muted font-bold uppercase tracking-wider px-1">
+                    Participants ({totalParticipants})
+                  </span>
+                  <div className="flex-1 flex flex-row gap-3 overflow-x-auto pb-1 items-center min-w-0">
+                    {/* Local User Card */}
+                    <div className="w-32 shrink-0 h-full">
+                      {renderVideoCard(
+                        'local',
+                        localStream,
+                        mongoUser?.displayName || 'You',
+                        isMuted,
+                        isCameraOff,
+                        isScreenSharing,
+                        true,
+                        true // isSmall
+                      )}
+                    </div>
+
+                    {/* Excess Remote Participant Cards */}
+                    {sidebarRemotes.map((socketId) => {
+                      const peer = remoteStreams[socketId];
+                      return (
+                        <div key={socketId} className="w-32 shrink-0 h-full">
+                          {renderVideoCard(
+                            socketId,
+                            peer.stream,
+                            peer.displayName || 'Participant',
+                            peer.isMuted,
+                            peer.isCameraOff || !peer.stream,
+                            peer.isScreenSharing,
+                            false,
+                            true // isSmall
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                /* Vertical Scroll panel for Desktop Laptops */
+                <div className="w-64 shrink-0 flex flex-col gap-4 overflow-y-auto pr-1 py-2 h-full">
+                  <span className="text-[10px] text-textCol-muted font-bold uppercase tracking-wider px-1 block">
+                    Participants ({totalParticipants})
+                  </span>
+                  
+                  {/* Local User Card at the Top */}
+                  {renderVideoCard(
+                    'local',
+                    localStream,
+                    mongoUser?.displayName || 'You',
+                    isMuted,
+                    isCameraOff,
+                    isScreenSharing,
+                    true,
+                    true // isSmall
+                  )}
+
+                  {/* Excess Remote Participant Cards below */}
+                  {sidebarRemotes.map((socketId) => {
+                    const peer = remoteStreams[socketId];
+                    return renderVideoCard(
+                      socketId,
+                      peer.stream,
+                      peer.displayName || 'Participant',
+                      peer.isMuted,
+                      peer.isCameraOff || !peer.stream,
+                      peer.isScreenSharing,
+                      false,
+                      true // isSmall
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )
         ) : (
           /* Pinned Speaker / Speaker Zoom Layout */
           <div className="flex w-full h-full gap-5 overflow-hidden">
