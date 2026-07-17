@@ -113,7 +113,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-6 pt-16 pb-24 md:pt-24 flex flex-col lg:flex-row items-center gap-16 relative">
+      <section className="max-w-[85rem] mx-auto px-6 pt-16 pb-24 md:pt-24 flex flex-col lg:flex-row items-center gap-16 relative">
         <motion.div 
           className="flex-1 space-y-8 text-center lg:text-left"
           initial={{ opacity: 0, x: -50 }}
@@ -180,42 +180,44 @@ export default function Home() {
 
         {/* Hero Interactive App Preview */}
         <motion.div 
-          className="flex-1 w-full relative"
+          className="lg:flex-[1.2] w-full relative"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.2 }}
         >
           <div className="glass-panel p-3 w-full border border-borderCol rounded-glass shadow-2xl relative overflow-hidden bg-bg-secondary/40 aspect-video flex flex-col">
             {/* Mock Header */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-borderCol">
+            <div className="flex items-center justify-between px-3 py-2.5 border-b border-borderCol">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
                 <span className="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
                 <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
               </div>
-              <span className="text-xs text-textCol-muted font-mono font-normal">meeting/yul-qpxd-pzb</span>
-              <div className="flex items-center gap-1 bg-red-600/20 text-red-500 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide border border-red-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping mr-1"></span> REC
-              </div>
+              <span className="text-xs text-textCol-muted font-mono font-medium tracking-wide">meeting/yul-qpxd-pzb</span>
+              <div className="w-8"></div>
             </div>
 
             {/* Grid of users */}
             <div className="flex-1 p-3 grid grid-cols-2 gap-3 relative">
               <div className="rounded-xl overflow-hidden relative border border-greenAccent/60 shadow-lg group">
-                <div className="w-full h-full bg-blueAccent/10 flex items-center justify-center absolute inset-0 text-xl font-bold text-blueAccent-light">
-                  M
+                <div className="w-full h-full bg-gradient-to-tr from-blueAccent/25 to-blueAccent/5 flex items-center justify-center absolute inset-0">
+                  <div className="w-14 h-14 rounded-full bg-blueAccent flex items-center justify-center text-white font-bold text-lg shadow-lg border border-white/20 ring-4 ring-blueAccent/10">
+                    M
+                  </div>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-2.5">
                   <span className="text-xs text-white font-medium">Morgan (You)</span>
                 </div>
                 <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-greenAccent flex items-center justify-center">
-                  <span className="w-2 h-2 rounded-full bg-white"></span>
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
                 </div>
               </div>
 
               <div className="rounded-xl overflow-hidden relative border border-borderCol">
-                <div className="w-full h-full bg-greenAccent/10 flex items-center justify-center absolute inset-0 text-xl font-bold text-greenAccent-light">
-                  A
+                <div className="w-full h-full bg-gradient-to-tr from-greenAccent/20 to-greenAccent/5 flex items-center justify-center absolute inset-0">
+                  <div className="w-14 h-14 rounded-full bg-greenAccent flex items-center justify-center text-white font-bold text-lg shadow-lg border border-white/20">
+                    A
+                  </div>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-2.5">
                   <span className="text-xs text-white font-medium">Alex Rivera</span>
@@ -223,8 +225,10 @@ export default function Home() {
               </div>
 
               <div className="rounded-xl overflow-hidden relative border border-borderCol">
-                <div className="w-full h-full bg-blueAccent/10 flex items-center justify-center absolute inset-0 text-xl font-bold text-blueAccent-light">
-                  J
+                <div className="w-full h-full bg-gradient-to-tr from-purple-500/20 to-purple-500/5 flex items-center justify-center absolute inset-0">
+                  <div className="w-14 h-14 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg border border-white/20">
+                    J
+                  </div>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-2.5">
                   <span className="text-xs text-white font-medium">Jordan Vance</span>
@@ -245,7 +249,7 @@ export default function Home() {
             <div className="py-2.5 flex items-center justify-center gap-3 border-t border-borderCol">
               <span className="w-8 h-8 rounded-full bg-surface-glass border border-borderCol flex items-center justify-center cursor-pointer hover:bg-white/10"><Video className="w-3.5 h-3.5 text-blueAccent" /></span>
               <span className="w-8 h-8 rounded-full bg-surface-glass border border-borderCol flex items-center justify-center cursor-pointer hover:bg-white/10"><Users className="w-3.5 h-3.5 text-textCol-secondary" /></span>
-              <span className="w-8 h-8 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center cursor-pointer hover:bg-red-600"><Video className="w-3.5 h-3.5 text-red-500" /></span>
+              <span className="w-8 h-8 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center cursor-pointer hover:bg-red-600"><PhoneOff className="w-3.5 h-3.5 text-red-500" /></span>
             </div>
           </div>
         </motion.div>
