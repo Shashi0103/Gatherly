@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, Shield, Monitor, MessageSquare, Calendar, Download, Users, Zap, Check, Sun, Moon, X } from 'lucide-react';
+import { Video, Shield, Monitor, MessageSquare, Calendar, Download, Users, Zap, Check, Sun, Moon, X, PhoneOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
