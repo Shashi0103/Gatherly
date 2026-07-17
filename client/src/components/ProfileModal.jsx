@@ -103,7 +103,7 @@ export default function ProfileModal({ isOpen, onClose }) {
       }
 
       await updateProfile(updates);
-      setSuccess('Profile updated successfully!');
+      setSuccess('Profile updated');
       
       // Clear password inputs
       setPassword('');
@@ -112,7 +112,7 @@ export default function ProfileModal({ isOpen, onClose }) {
       setTimeout(() => {
         setSuccess('');
         onClose();
-      }, 1500);
+      }, 2000);
     } catch (err) {
       console.error('Failed updating profile:', err);
       setError(err.response?.data?.message || 'Failed to update profile details.');
