@@ -76,13 +76,13 @@ export default function Home() {
       {/* Navbar */}
       <header className="sticky top-0 z-50 glass-panel !rounded-none !border-t-0 !border-x-0 bg-bg-primary/60 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 cursor-pointer">
+          <div className="flex items-center gap-3">
             {/* Solid color - no gradients */}
             <div className="w-10 h-10 rounded-xl bg-blueAccent flex items-center justify-center shadow-md">
               <Video className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold tracking-tight text-textCol-primary">Gatherly</span>
-          </Link>
+          </div>
 
           <div className="flex items-center gap-4">
             {/* Theme Toggle Button */}
@@ -122,7 +122,7 @@ export default function Home() {
         >
           {/* Solid color heading - no text gradients */}
           <h1 className="text-5xl md:text-6xl font-bold leading-tight tracking-tight text-textCol-primary">
-            Lightweight Video Conferencing.<br />
+            Instant Video Conferencing.<br />
             <span className="text-blueAccent">
               Connected in Seconds.
             </span>
