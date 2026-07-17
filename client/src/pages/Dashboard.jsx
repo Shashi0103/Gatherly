@@ -37,16 +37,18 @@ export default function Dashboard() {
       const upcoming = res.data.filter(m => {
         const start = new Date(m.scheduledAt).getTime();
         const end = start + m.duration * 60 * 1000;
-        return end > now && m.status !== 'cancelled' && m.status !== 'past';
+        const isInstant = m.title?.startsWith('Instant Meeting');
+        return end > now && m.status !== 'cancelled' && m.status !== 'past' && !isInstant;
       }).length;
       const past = res.data.filter(m => {
         const start = new Date(m.scheduledAt).getTime();
         const end = start + m.duration * 60 * 1000;
-        return end <= now || m.status === 'past';
+        const isInstant = m.title?.startsWith('Instant Meeting');
+        return (end <= now || m.status === 'past') && !isInstant;
       }).length;
       
       setStats({
-        total: res.data.length,
+        total: res.data.filter(m => !m.title?.startsWith('Instant Meeting')).length,
         upcoming,
         past
       });
@@ -152,12 +154,14 @@ export default function Dashboard() {
   const upcomingList = meetings.filter(m => {
     const start = new Date(m.scheduledAt).getTime();
     const end = start + m.duration * 60 * 1000;
-    return end > new Date().getTime() && m.status !== 'cancelled' && m.status !== 'past';
+    const isInstant = m.title?.startsWith('Instant Meeting');
+    return end > new Date().getTime() && m.status !== 'cancelled' && m.status !== 'past' && !isInstant;
   });
   const pastList = meetings.filter(m => {
     const start = new Date(m.scheduledAt).getTime();
     const end = start + m.duration * 60 * 1000;
-    return end <= new Date().getTime() || m.status === 'past';
+    const isInstant = m.title?.startsWith('Instant Meeting');
+    return (end <= new Date().getTime() || m.status === 'past') && !isInstant;
   });
 
   return (
