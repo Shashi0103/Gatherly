@@ -97,6 +97,11 @@ export default function MeetingRoom() {
     const isCurrentUserAdmin = (mongoUser?.uid === meetingHostId || mongoUser?._id === meetingHostId);
     const isUnstable = id === 'local' ? isLocalNetworkUnstable : (remoteStreams[id]?.connectionStatus === 'unstable');
     
+    // Append (Me) for the local user view
+    const labelName = isLocal 
+      ? (displayName.includes('(Me)') ? displayName : `${displayName} (Me)`) 
+      : displayName;
+    
     const cardClass = isSmall
       ? (isMobile
           ? 'w-full h-full border-borderCol rounded-2xl border !aspect-auto shadow-lg'
@@ -156,7 +161,7 @@ export default function MeetingRoom() {
         <div className="z-10 p-2.5 bg-black/40 flex items-center justify-between rounded-t-2xl">
           <div className="flex items-center gap-2 min-w-0">
             <span className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-white font-semibold line-clamp-1`}>
-              {displayName} {isScreenSharing && ' (Sharing)'}
+              {labelName} {isScreenSharing && ' (Sharing)'}
             </span>
             {isParticipantAdmin && (
               <span className="py-0.5 px-1.5 rounded bg-blueAccent/25 border border-blueAccent/30 text-blueAccent-light text-[9px] font-bold uppercase tracking-wider shrink-0">
