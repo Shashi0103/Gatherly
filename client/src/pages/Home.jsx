@@ -133,7 +133,7 @@ export default function Home() {
           </p>
 
           {/* Join Meeting CTA Block */}
-          <div className="flex flex-row flex-wrap items-center justify-center lg:justify-start gap-4 max-w-2xl mx-auto lg:mx-0">
+          <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center lg:justify-start gap-4 max-w-2xl mx-auto lg:mx-0">
             <form onSubmit={handleJoin} className="flex w-full sm:w-auto relative items-center">
               <input
                 type="text"
@@ -155,14 +155,14 @@ export default function Home() {
 
             <button 
               onClick={() => currentUser ? navigate('/dashboard') : navigate('/login')} 
-              className="btn-primary py-3.5 px-6 flex items-center justify-center gap-2 shrink-0"
+              className="btn-primary py-3.5 px-6 flex items-center justify-center gap-2 shrink-0 w-full sm:w-auto"
             >
               Start New Call
             </button>
           </div>
 
           {/* Stats Bar */}
-          <div className="pt-8 grid grid-cols-3 gap-4 sm:gap-6 max-w-md mx-auto lg:mx-0 text-center lg:text-left border-t border-borderCol">
+          <div className="pt-8 grid grid-cols-3 gap-4 sm:gap-6 max-w-md mx-auto lg:mx-0 text-left border-t border-borderCol">
             <div>
               <p className="text-xl sm:text-2xl font-bold text-textCol-primary">Meetings</p>
               <p className="text-[10px] sm:text-xs text-textCol-muted">Up to 10 participants</p>
@@ -173,7 +173,7 @@ export default function Home() {
             </div>
             <div>
               <p className="text-xl sm:text-2xl font-bold text-blueAccent">&lt; 100ms</p>
-              <p className="text-[10px] sm:text-xs text-textCol-muted">Connection Latency</p>
+              <p className="text-[10px] sm:text-xs text-textCol-muted">Latency</p>
             </div>
           </div>
         </motion.div>
@@ -198,17 +198,17 @@ export default function Home() {
             </div>
 
             {/* Grid of users */}
-            <div className="flex-1 p-2 sm:p-3 grid grid-cols-2 gap-2 sm:gap-3 relative">
+            <div className="flex-1 p-3 grid grid-cols-2 gap-3 relative">
               <div className="rounded-xl overflow-hidden relative border border-greenAccent/60 shadow-lg group">
                 <div className="w-full h-full bg-gradient-to-tr from-blueAccent/25 to-blueAccent/5 flex items-center justify-center absolute inset-0">
                   <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-blueAccent flex items-center justify-center text-white font-bold text-sm sm:text-lg shadow-lg border border-white/20 ring-4 ring-blueAccent/10">
                     M
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-1.5 sm:p-2.5">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-2.5">
                   <span className="text-[10px] sm:text-xs text-white font-medium">Morgan (You)</span>
                 </div>
-                <div className="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 w-4.5 h-4.5 sm:w-6 sm:h-6 rounded-full bg-greenAccent flex items-center justify-center">
+                <div className="absolute top-2.5 right-2.5 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-greenAccent flex items-center justify-center">
                   <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse"></span>
                 </div>
               </div>
@@ -219,7 +219,7 @@ export default function Home() {
                     A
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-1.5 sm:p-2.5">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-2.5">
                   <span className="text-[10px] sm:text-xs text-white font-medium">Alex Rivera</span>
                 </div>
               </div>
@@ -230,26 +230,26 @@ export default function Home() {
                     J
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-1.5 sm:p-2.5">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-2.5">
                   <span className="text-[10px] sm:text-xs text-white font-medium">Jordan Vance</span>
                 </div>
               </div>
 
               <div className="rounded-xl overflow-hidden relative border border-borderCol flex items-center justify-center bg-bg-primary/80">
-                <div className="text-center space-y-1 sm:space-y-2">
+                <div className="text-center space-y-2">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-surface-glass flex items-center justify-center mx-auto border border-borderCol">
-                    <Users className="w-3 h-3 sm:w-4 sm:h-4 text-textCol-secondary" />
+                    <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-textCol-secondary" />
                   </div>
-                  <span className="text-[8px] sm:text-[10px] text-textCol-muted block">Waiting for peers...</span>
+                  <span className="text-[9px] sm:text-[10px] text-textCol-muted block">Waiting...</span>
                 </div>
               </div>
             </div>
 
             {/* Float Controls */}
-            <div className="py-1.5 sm:py-2.5 flex items-center justify-center gap-2 sm:gap-3 border-t border-borderCol">
-              <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-surface-glass border border-borderCol flex items-center justify-center cursor-pointer hover:bg-white/10"><Video className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blueAccent" /></span>
-              <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-surface-glass border border-borderCol flex items-center justify-center cursor-pointer hover:bg-white/10"><Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-textCol-secondary" /></span>
-              <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center cursor-pointer hover:bg-red-600"><PhoneOff className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-500" /></span>
+            <div className="py-2 flex items-center justify-center gap-3 border-t border-borderCol">
+              <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-surface-glass border border-borderCol flex items-center justify-center cursor-pointer hover:bg-white/10"><Video className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blueAccent" /></span>
+              <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-surface-glass border border-borderCol flex items-center justify-center cursor-pointer hover:bg-white/10"><Users className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-textCol-secondary" /></span>
+              <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center cursor-pointer hover:bg-red-600"><PhoneOff className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-red-500" /></span>
             </div>
           </div>
         </motion.div>
@@ -259,7 +259,7 @@ export default function Home() {
       <section className="bg-bg-secondary/40 border-y border-borderCol py-24 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-textCol-primary">Seamless connection, built for privacy</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-textCol-primary">Seamless meetings, built for privacy</h2>
             <p className="text-textCol-secondary text-sm md:text-base">
               Gatherly combines professional video conferencing capabilities with secure peer-to-peer technology, running flawlessly inside your web browser.
             </p>
