@@ -122,7 +122,7 @@ export default function Home() {
         >
           {/* Solid color heading - no text gradients */}
           <h1 className="text-5xl md:text-6xl font-bold leading-tight tracking-tight text-textCol-primary">
-            Lightweight Video Rooms.<br />
+            Lightweight Video Conferencing.<br />
             <span className="text-blueAccent">
               Connected in Seconds.
             </span>
