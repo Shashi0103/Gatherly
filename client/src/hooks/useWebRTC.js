@@ -109,6 +109,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
             stream: null,
             userId: peer.userId,
             displayName: peer.displayName,
+            photoURL: peer.photoURL || '',
             isMuted: false,
             isCameraOff: false,
             isScreenSharing: false,
@@ -145,7 +146,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
     });
 
     // B. Received Join Broadcast from a new peer
-    socket.on('user-joined', ({ socketId, userId: peerUserId, displayName: peerName }) => {
+    socket.on('user-joined', ({ socketId, userId: peerUserId, displayName: peerName, photoURL: peerPhotoURL }) => {
       console.log(`New peer joined: ${peerName} (${socketId})`);
       if (onUserJoined) {
         onUserJoined(peerName);
@@ -157,6 +158,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
           stream: null,
           userId: peerUserId,
           displayName: peerName,
+          photoURL: peerPhotoURL || '',
           isMuted: false,
           isCameraOff: false,
           isScreenSharing: false,

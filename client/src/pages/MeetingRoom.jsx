@@ -88,7 +88,7 @@ export default function MeetingRoom() {
     }
   }, [remoteStreams, pinnedUser]);
 
-  const renderVideoCard = (id, stream, displayName, isMuted, isCameraOff, isScreenSharing, isLocal, isSmall = false) => {
+  const renderVideoCard = (id, stream, displayName, isMuted, isCameraOff, isScreenSharing, isLocal, isSmall = false, photoURL = null) => {
     const isSpeaking = speakingUsers[id];
     const isPinned = pinnedUser === id;
     const isParticipantAdmin = (id === 'local'
@@ -133,9 +133,21 @@ export default function MeetingRoom() {
         {/* Video Muted Overlay Placeholder */}
         {isCameraOff && (
           <div className="absolute inset-0 bg-bg-secondary flex flex-col items-center justify-center gap-3">
-            <div className={`rounded-full flex items-center justify-center text-white font-bold ${isSmall ? 'w-10 h-10 text-sm' : 'w-16 h-16 text-xl'} ${isLocal ? 'bg-blueAccent' : 'bg-greenAccent'}`}>
-              {getInitials(displayName)}
-            </div>
+            {photoURL ? (
+              <img 
+                src={photoURL} 
+                alt={displayName} 
+                className={`rounded-full object-cover border-2 shadow-inner ${
+                  isLocal ? 'border-blueAccent' : 'border-greenAccent'
+                } ${
+                  isSmall ? 'w-10 h-10' : 'w-16 h-16'
+                }`}
+              />
+            ) : (
+              <div className={`rounded-full flex items-center justify-center text-white font-bold ${isSmall ? 'w-10 h-10 text-sm' : 'w-16 h-16 text-xl'} ${isLocal ? 'bg-blueAccent' : 'bg-greenAccent'}`}>
+                {getInitials(displayName)}
+              </div>
+            )}
             {!isSmall && <span className="text-[10px] text-textCol-muted uppercase font-semibold tracking-wider">Camera Turned Off</span>}
           </div>
         )}
@@ -536,7 +548,9 @@ export default function MeetingRoom() {
                 isMuted,
                 isCameraOff,
                 isScreenSharing,
-                true
+                true,
+                false,
+                mongoUser?.photoURL
               )}
 
               {/* 2. Remote Video Cards */}
@@ -549,7 +563,9 @@ export default function MeetingRoom() {
                   peer.isMuted,
                   peer.isCameraOff || !peer.stream,
                   peer.isScreenSharing,
-                  false
+                  false,
+                  false,
+                  peer.photoURL
                 );
               })}
             </div>
@@ -572,7 +588,9 @@ export default function MeetingRoom() {
                       peer.isMuted,
                       peer.isCameraOff || !peer.stream,
                       peer.isScreenSharing,
-                      false
+                      false,
+                      false,
+                      peer.photoURL
                     );
                   })}
                 </div>
@@ -596,7 +614,8 @@ export default function MeetingRoom() {
                         isCameraOff,
                         isScreenSharing,
                         true,
-                        true // isSmall
+                        true, // isSmall
+                        mongoUser?.photoURL
                       )}
                     </div>
 
@@ -613,7 +632,8 @@ export default function MeetingRoom() {
                             peer.isCameraOff || !peer.stream,
                             peer.isScreenSharing,
                             false,
-                            true // isSmall
+                            true, // isSmall
+                            peer.photoURL
                           )}
                         </div>
                       );
@@ -636,7 +656,8 @@ export default function MeetingRoom() {
                     isCameraOff,
                     isScreenSharing,
                     true,
-                    true // isSmall
+                    true, // isSmall
+                    mongoUser?.photoURL
                   )}
 
                   {/* Excess Remote Participant Cards below */}
@@ -650,7 +671,8 @@ export default function MeetingRoom() {
                       peer.isCameraOff || !peer.stream,
                       peer.isScreenSharing,
                       false,
-                      true // isSmall
+                      true, // isSmall
+                      peer.photoURL
                     );
                   })}
                 </div>
@@ -670,7 +692,9 @@ export default function MeetingRoom() {
                     isMuted,
                     isCameraOff,
                     isScreenSharing,
-                    true
+                    true,
+                    false,
+                    mongoUser?.photoURL
                   )
                 : (() => {
                     const peer = remoteStreams[pinnedUser];
@@ -682,7 +706,9 @@ export default function MeetingRoom() {
                           peer.isMuted,
                           peer.isCameraOff || !peer.stream,
                           peer.isScreenSharing,
-                          false
+                          false,
+                          false,
+                          peer.photoURL
                         )
                       : null;
                   })()}
@@ -700,7 +726,8 @@ export default function MeetingRoom() {
                   isCameraOff,
                   isScreenSharing,
                   true,
-                  true
+                  true,
+                  mongoUser?.photoURL
                 )}
 
               {/* Show Remotes in sidebar if not pinned */}
@@ -716,7 +743,8 @@ export default function MeetingRoom() {
                     peer.isCameraOff || !peer.stream,
                     peer.isScreenSharing,
                     false,
-                    true
+                    true,
+                    peer.photoURL
                   );
                 })}
             </div>
