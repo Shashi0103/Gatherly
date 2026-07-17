@@ -11,7 +11,7 @@ const ICE_SERVERS = {
   ],
 };
 
-export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
+export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) => {
   const [localStream, setLocalStream] = useState(null);
   const [facingMode, setFacingMode] = useState('user'); // 'user' (front) or 'environment' (back)
   const [remoteStreams, setRemoteStreams] = useState({});
@@ -96,6 +96,14 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
   // Bind Signaling events
   const bindSocketEvents = () => {
     const socket = socketRef.current;
+
+    // Listen for room full event
+    socket.on('room-full', ({ message }) => {
+      console.warn(`Room is full: ${message}`);
+      if (onError) {
+        onError(message || 'This meeting room is full (maximum 10 participants).');
+      }
+    });
 
     // A. Received list of all existing users in the room
     socket.on('all-users', async (users) => {

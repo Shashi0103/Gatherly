@@ -47,10 +47,18 @@ export default function MeetingRoom() {
     sendChatMessage,
     facingMode,
     switchCamera,
-  } = useWebRTC(roomId, mongoUser?.uid || mongoUser?._id, mongoUser?.displayName, (peerName) => {
-    setJoinAlert(`${peerName} joined the meeting`);
-    setTimeout(() => setJoinAlert(''), 3000);
-  });
+  } = useWebRTC(
+    roomId, 
+    mongoUser?.uid || mongoUser?._id, 
+    mongoUser?.displayName, 
+    (peerName) => {
+      setJoinAlert(`${peerName} joined the meeting`);
+      setTimeout(() => setJoinAlert(''), 3000);
+    },
+    (errMsg) => {
+      setMeetingError(errMsg);
+    }
+  );
 
   // Track responsive screen sizing for mobile specific viewports
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
