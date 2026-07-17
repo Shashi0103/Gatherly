@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Calendar, Mail, Clock, Check } from 'lucide-react';
+import { X, Plus, Calendar, Mail, Clock, Check, Copy } from 'lucide-react';
 import axios from 'axios';
 
 export default function ScheduleModal({ isOpen, onClose, onScheduleSuccess }) {
@@ -14,6 +14,15 @@ export default function ScheduleModal({ isOpen, onClose, onScheduleSuccess }) {
   const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [scheduledMeeting, setScheduledMeeting] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    if (!scheduledMeeting) return;
+    const fullUrl = `${window.location.origin}/meet/${scheduledMeeting.meetingLink}`;
+    navigator.clipboard.writeText(fullUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleAddEmail = (e) => {
     if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
@@ -85,6 +94,7 @@ export default function ScheduleModal({ isOpen, onClose, onScheduleSuccess }) {
     setEmails([]);
     setEmailInput('');
     setScheduledMeeting(null);
+    setCopied(false);
     onClose();
   };
 
@@ -240,10 +250,24 @@ export default function ScheduleModal({ isOpen, onClose, onScheduleSuccess }) {
 
             <div className="p-4 rounded-xl bg-surface-card border border-borderCol text-left space-y-3">
               <div>
-                <span className="text-[10px] text-textCol-muted block uppercase tracking-wider font-bold">Link</span>
-                <span className="text-sm text-white select-all font-mono">
-                  {window.location.origin}/meet/{scheduledMeeting.meetingLink}
-                </span>
+                <span className="text-[10px] text-textCol-muted block uppercase tracking-wider font-bold mb-1">Link</span>
+                <div className="flex items-center gap-2 p-2 bg-bg-primary border border-borderCol rounded-xl">
+                  <span className="text-xs text-white select-all font-mono truncate flex-1 pl-1">
+                    {window.location.origin}/meet/{scheduledMeeting.meetingLink}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="p-2 rounded-lg bg-surface-card hover:bg-white/10 border border-borderCol hover:border-white/20 transition-all text-textCol-secondary hover:text-white flex items-center justify-center shrink-0 cursor-pointer"
+                    title="Copy Meeting Link"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-greenAccent" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-textCol-secondary hover:text-white" />
+                    )}
+                  </button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
