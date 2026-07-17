@@ -259,9 +259,9 @@ export default function Home() {
       <section className="bg-bg-secondary/40 border-y border-borderCol py-24 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-textCol-primary">Stunning capabilities, zero compromises</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-textCol-primary">Premium collaboration, built for privacy</h2>
             <p className="text-textCol-secondary text-sm md:text-base">
-              Engineered with modern technologies, Gatherly delivers all the features you expect from a premium conferencing tool, optimized directly in your web browser.
+              Gatherly combines professional video conferencing capabilities with secure peer-to-peer technology, running flawlessly inside your web browser.
             </p>
           </div>
 
