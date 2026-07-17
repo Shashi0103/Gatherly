@@ -155,12 +155,13 @@ export default function Dashboard() {
     const end = start + m.duration * 60 * 1000;
     const isInstant = m.title?.startsWith('Instant Meeting');
     return end > new Date().getTime() && m.status !== 'cancelled' && m.status !== 'past' && !isInstant;
-  });
+  }).sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
+
   const pastList = meetings.filter(m => {
     const start = new Date(m.scheduledAt).getTime();
     const end = start + m.duration * 60 * 1000;
     return end <= new Date().getTime() || m.status === 'past';
-  });
+  }).sort((a, b) => new Date(b.scheduledAt) - new Date(a.scheduledAt));
 
   return (
     <div className="min-h-screen bg-bg-primary flex text-textCol-primary overflow-hidden">
@@ -264,9 +265,9 @@ export default function Dashboard() {
         </section>
 
         {/* Meetings List */}
-        <section className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <section className="space-y-8">
           {/* Upcoming Meetings List */}
-          <div className="xl:col-span-2 space-y-4">
+          <div className="space-y-4">
             <h3 className="text-lg font-bold text-textCol-primary flex items-center gap-2">
               <Calendar className="w-5 h-5 text-greenAccent" /> Upcoming Meetings
             </h3>
