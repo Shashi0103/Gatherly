@@ -58,9 +58,9 @@ export default function ProfileModal({ isOpen, onClose }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // 2MB limit check for Base64 storage in Mongo
-      if (file.size > 2 * 1024 * 1024) {
-        setError('Image file must be under 2MB.');
+      // 500KB limit check for Base64 storage in Mongo
+      if (file.size > 500 * 1024) {
+        setError('Image file must be under 500KB.');
         return;
       }
       
