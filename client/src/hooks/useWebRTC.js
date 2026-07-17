@@ -15,8 +15,8 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
   const [localStream, setLocalStream] = useState(null);
   const [facingMode, setFacingMode] = useState('user'); // 'user' (front) or 'environment' (back)
   const [remoteStreams, setRemoteStreams] = useState({});
-  const [isMuted, setIsMuted] = useState(false);
-  const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isCameraOff, setIsCameraOff] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [speakingUsers, setSpeakingUsers] = useState({});
@@ -62,6 +62,10 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
           stream.getTracks().forEach((track) => track.stop());
           return;
         }
+
+        // Disable audio and video tracks immediately by default
+        stream.getAudioTracks().forEach((track) => track.enabled = false);
+        stream.getVideoTracks().forEach((track) => track.enabled = false);
 
         localStreamRef.current = stream;
         setLocalStream(stream);
