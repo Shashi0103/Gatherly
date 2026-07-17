@@ -18,6 +18,14 @@ export default function Dashboard() {
   const [joinCode, setJoinCode] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 10000); // Check every 10 seconds to reactively re-evaluate lists
+    return () => clearInterval(timer);
+  }, []);
   
   // Stats
   const [stats, setStats] = useState({
@@ -43,6 +51,8 @@ export default function Dashboard() {
       const past = res.data.filter(m => {
         const start = new Date(m.scheduledAt).getTime();
         const end = start + m.duration * 60 * 1000;
+        const isInstant = m.title?.startsWith('Instant Meeting');
+        if (isInstant) return true;
         return end <= now || m.status === 'past';
       }).length;
       
@@ -154,13 +164,15 @@ export default function Dashboard() {
     const start = new Date(m.scheduledAt).getTime();
     const end = start + m.duration * 60 * 1000;
     const isInstant = m.title?.startsWith('Instant Meeting');
-    return end > new Date().getTime() && m.status !== 'cancelled' && m.status !== 'past' && !isInstant;
+    return end > currentTime && m.status !== 'cancelled' && m.status !== 'past' && !isInstant;
   }).sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
 
   const pastList = meetings.filter(m => {
     const start = new Date(m.scheduledAt).getTime();
     const end = start + m.duration * 60 * 1000;
-    return end <= new Date().getTime() || m.status === 'past';
+    const isInstant = m.title?.startsWith('Instant Meeting');
+    if (isInstant) return true;
+    return end <= currentTime || m.status === 'past';
   }).sort((a, b) => new Date(b.scheduledAt) - new Date(a.scheduledAt));
 
   return (
