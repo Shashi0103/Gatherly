@@ -96,7 +96,7 @@ export default function MeetingRoom() {
     }
   }, [remoteStreams, pinnedUser]);
 
-  const renderVideoCard = (id, stream, displayName, isMuted, isCameraOff, isScreenSharing, isLocal, isSmall = false, photoURL = null) => {
+  const renderVideoCard = (id, stream, displayName, isMuted, isCameraOff, isScreenSharing, isLocal, isSmall = false, photoURL = null, extraClass = '') => {
     const isSpeaking = speakingUsers[id];
     const isPinned = pinnedUser === id;
     const isParticipantAdmin = (id === 'local'
@@ -126,7 +126,7 @@ export default function MeetingRoom() {
           !isLocal && isMuted ? 'opacity-90' : 'opacity-100'
         } ${
           isSpeaking && !isMuted ? 'border-greenAccent speaking-indicator ring-4 ring-greenAccent/20' : 'border-borderCol'
-        }`}
+        } ${extraClass}`}
       >
         {stream && !isCameraOff && (
           <video
@@ -563,12 +563,15 @@ export default function MeetingRoom() {
                 isScreenSharing,
                 true,
                 false,
-                mongoUser?.photoURL
+                mongoUser?.photoURL,
+                ''
               )}
 
               {/* 2. Remote Video Cards */}
-              {Object.keys(remoteStreams).map((socketId) => {
+              {Object.keys(remoteStreams).map((socketId, index) => {
                 const peer = remoteStreams[socketId];
+                const isThirdItem = (index + 1) === 2; // local is 0, peer 1 is 1, peer 2 is 2
+                const isThirdItemOfThreeOnMobile = isMobile && totalParticipants === 3 && isThirdItem;
                 return renderVideoCard(
                   socketId,
                   peer.stream,
@@ -578,7 +581,8 @@ export default function MeetingRoom() {
                   peer.isScreenSharing,
                   false,
                   false,
-                  peer.photoURL
+                  peer.photoURL,
+                  isThirdItemOfThreeOnMobile ? 'col-span-2' : ''
                 );
               })}
             </div>
@@ -949,6 +953,25 @@ export default function MeetingRoom() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Hidden audio feeds for remote participants with camera off */}
+      <div className="hidden">
+        {Object.keys(remoteStreams).map((socketId) => {
+          const peer = remoteStreams[socketId];
+          const isCameraOff = peer.isCameraOff || !peer.stream;
+          return peer.stream && isCameraOff ? (
+            <audio
+              key={`audio-feed-${socketId}`}
+              autoPlay
+              playsInline
+              ref={(el) => {
+                if (el && peer.stream && el.srcObject !== peer.stream) {
+                  el.srcObject = peer.stream;
+                }
+              }}
+            />
+          ) : null;
+        })}
+      </div>
     </div>
   );
 }
