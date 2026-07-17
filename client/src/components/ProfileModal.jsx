@@ -154,12 +154,6 @@ export default function ProfileModal({ isOpen, onClose }) {
                 <span className="text-xs text-red-300 font-medium">{error}</span>
               </div>
             )}
-            {success && (
-              <div className="mt-4 p-3 rounded-xl bg-greenAccent/15 border border-greenAccent/20 flex items-start gap-2.5 shrink-0">
-                <Check className="w-4.5 h-4.5 text-greenAccent shrink-0 mt-0.5" />
-                <span className="text-xs text-greenAccent-light font-medium">{success}</span>
-              </div>
-            )}
 
             <form onSubmit={handleSave} className="flex-1 flex flex-col overflow-hidden mt-4">
               
@@ -296,6 +290,31 @@ export default function ProfileModal({ isOpen, onClose }) {
                 </button>
               </div>
             </form>
+
+            {/* Floating Success Toast Overlay inside modal */}
+            <AnimatePresence>
+              {success && (
+                <motion.div
+                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute bottom-6 left-6 right-6 p-4 rounded-xl bg-greenAccent border border-greenAccent-hover text-white flex items-center gap-3 shadow-2xl z-50 justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-white shrink-0" />
+                    <div className="text-sm font-semibold text-white select-none">{success}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSuccess('')}
+                    className="text-white/80 hover:text-white transition-colors cursor-pointer focus:outline-none"
+                  >
+                    <X className="w-4 h-4 shrink-0" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </div>
       )}
