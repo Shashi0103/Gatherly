@@ -318,12 +318,6 @@ export default function Home() {
           </p>
           <div className="flex gap-4">
             <Link to="/login" className="btn-secondary !py-2.5 !px-4 text-xs font-semibold">Join Gatherly Now</Link>
-            <button 
-              onClick={() => setModalType('docs')} 
-              className="btn-ghost !py-2.5 !px-4 text-xs font-semibold hover:bg-white/10 cursor-pointer"
-            >
-              Technical Docs
-            </button>
           </div>
         </div>
       </section>
@@ -399,38 +393,6 @@ export default function Home() {
                     <p><strong>1. Peer-to-Peer Data:</strong> Gatherly relies on WebRTC to transmit video and audio streams directly between users. We do not inspect, collect, or store your live call media on our servers.</p>
                     <p><strong>2. Account & Room Info:</strong> We save minimal account details (display name, email) and meeting room links securely in MongoDB to facilitate scheduling features.</p>
                     <p><strong>3. Secure Recordings:</strong> Session recordings are generated inside your browser and compiled locally on your device. We do not store or transmit your recordings to third parties.</p>
-                  </div>
-                </div>
-              )}
-
-              {modalType === 'docs' && (
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-white mb-2">Technical Documentation</h3>
-                  <div className="space-y-4 text-sm text-textCol-secondary leading-relaxed">
-                    <div>
-                      <h4 className="font-semibold text-blueAccent-light text-xs uppercase tracking-wider mb-1">WebRTC Mesh Networking</h4>
-                      <p className="text-[13px]">
-                        Gatherly establishes a full-mesh P2P network using standard RTCPeerConnections. Peer SDP negotiations and ICE candidates are exchanged in real-time over Socket.IO signaling.
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-blueAccent-light text-xs uppercase tracking-wider mb-1">End-to-End Encryption</h4>
-                      <p className="text-[13px]">
-                        In-meeting messages are encrypted using client-derived AES-GCM keys. Decryption occurs strictly inside participant browser instances, ensuring absolute confidentiality.
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-blueAccent-light text-xs uppercase tracking-wider mb-1">Local Browser Recording</h4>
-                      <p className="text-[13px]">
-                        Meetings are recorded locally by drawing the grid stream to a canvas overlay. The final WebM file is converted directly into high-compatibility MP4 using FFmpeg WebAssembly.
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-blueAccent-light text-xs uppercase tracking-wider mb-1">Network Instability Checking</h4>
-                      <p className="text-[13px]">
-                        Monitors active connection state changes. If a peer drops packets or disconnects, other participants are instantly notified with stability indicator warnings.
-                      </p>
-                    </div>
                   </div>
                 </div>
               )}
