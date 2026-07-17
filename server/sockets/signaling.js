@@ -14,7 +14,7 @@ const configureSockets = (io) => {
         console.log(`👥 User ${userId} joining room ${roomId} via socket ${socket.id}`);
         
         // Enforce maximum 10 participants limit
-        const room = io.sockets.adapter.rooms.get(roomId);
+        let room = io.sockets.adapter.rooms.get(roomId);
         if (room && room.size >= 10) {
           console.log(`⚠️ Room ${roomId} is full. Rejecting user ${userId}`);
           socket.emit('room-full', { message: 'This meeting room is full (maximum 10 participants).' });
@@ -25,7 +25,7 @@ const configureSockets = (io) => {
         activeConnections.set(socket.id, { userId, roomId });
 
         // Fetch user profiles for other sockets in this room
-        const room = io.sockets.adapter.rooms.get(roomId);
+        room = io.sockets.adapter.rooms.get(roomId);
         const usersInRoom = [];
 
         if (room) {
