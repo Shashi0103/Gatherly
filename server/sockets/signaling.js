@@ -18,13 +18,13 @@ const configureSockets = (io) => {
         const meeting = await Meeting.findOne({ meetingLink: roomId });
         if (!meeting) {
           console.log(`⚠️ Meeting ${roomId} not found in database. Rejecting user ${userId}`);
-          socket.emit('join-error', { message: 'This meeting room does not exist.' });
+          socket.emit('join-error', { code: 'NOT_FOUND' });
           return;
         }
 
         if (meeting.status === 'cancelled') {
           console.log(`⚠️ Meeting ${roomId} is cancelled. Rejecting user ${userId}`);
-          socket.emit('join-error', { message: 'This meeting has been cancelled.' });
+          socket.emit('join-error', { code: 'CANCELLED' });
           return;
         }
 
@@ -37,19 +37,19 @@ const configureSockets = (io) => {
           const now = Date.now();
 
           if (now < startTime) {
-            const timeStr = new Date(meeting.scheduledAt).toLocaleString();
             console.log(`⚠️ Meeting ${roomId} has not started yet. Rejecting user ${userId}`);
             socket.emit('join-error', { 
-              message: `This meeting has not started yet. It is scheduled to start at ${timeStr}.` 
+              code: 'NOT_STARTED',
+              scheduledAt: meeting.scheduledAt
             });
             return;
           }
 
           if (now > endTime) {
-            const timeStr = new Date(endTime).toLocaleString();
             console.log(`⚠️ Meeting ${roomId} has already concluded. Rejecting user ${userId}`);
             socket.emit('join-error', { 
-              message: `This meeting has already ended. It was scheduled to conclude by ${timeStr}.` 
+              code: 'ALREADY_ENDED',
+              endTime: new Date(endTime).toISOString()
             });
             return;
           }

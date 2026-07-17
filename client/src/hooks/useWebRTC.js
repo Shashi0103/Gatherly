@@ -106,10 +106,41 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
     });
 
     // Listen for join error event (time interval & cancellation checks)
-    socket.on('join-error', ({ message }) => {
-      console.warn(`Join error: ${message}`);
+    socket.on('join-error', (data) => {
+      console.warn('Join error received:', data);
       if (onError) {
-        onError(message || 'Unable to join this meeting room.');
+        let displayMsg = 'Unable to join this meeting room.';
+        if (typeof data === 'string') {
+          displayMsg = data;
+        } else if (data && data.message) {
+          displayMsg = data.message;
+        } else if (data && data.code) {
+          switch (data.code) {
+            case 'NOT_FOUND':
+              displayMsg = 'This meeting room does not exist.';
+              break;
+            case 'CANCELLED':
+              displayMsg = 'This meeting has been cancelled.';
+              break;
+            case 'NOT_STARTED':
+              const startLocal = new Date(data.scheduledAt).toLocaleString([], {
+                dateStyle: 'short',
+                timeStyle: 'medium'
+              });
+              displayMsg = `This meeting has not started yet. It is scheduled to start at ${startLocal}.`;
+              break;
+            case 'ALREADY_ENDED':
+              const endLocal = new Date(data.endTime).toLocaleString([], {
+                dateStyle: 'short',
+                timeStyle: 'medium'
+              });
+              displayMsg = `This meeting has already ended. It was scheduled to conclude by ${endLocal}.`;
+              break;
+            default:
+              displayMsg = data.message || 'Unable to join this meeting room.';
+          }
+        }
+        onError(displayMsg);
       }
     });
 
