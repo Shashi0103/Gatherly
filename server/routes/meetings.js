@@ -34,8 +34,11 @@ router.post('/', protect, async (req, res) => {
 
     // Initialize participants list with the host
     const participants = [req.user.uid];
-    if (invitees && Array.isArray(invitees) && invitees.length > 0) {
-      const cleanEmails = invitees.map(email => email.trim().toLowerCase());
+    const cleanEmails = invitees && Array.isArray(invitees)
+      ? invitees.map(email => email.trim().toLowerCase())
+      : [];
+
+    if (cleanEmails.length > 0) {
       const invitedUsers = await User.find({ email: { $in: cleanEmails } });
       invitedUsers.forEach(user => {
         if (!participants.includes(user.uid)) {
@@ -52,6 +55,7 @@ router.post('/', protect, async (req, res) => {
       duration: duration || 30,
       status: 'upcoming',
       participants,
+      invitees: cleanEmails,
     });
 
     // Notify participants in real-time
@@ -75,10 +79,12 @@ router.post('/', protect, async (req, res) => {
 router.get('/', protect, async (req, res) => {
   try {
     const userId = req.user.uid;
+    const userEmail = req.user.email ? req.user.email.toLowerCase() : '';
     const meetings = await Meeting.find({
       $or: [
         { hostId: userId },
-        { participants: userId }
+        { participants: userId },
+        { invitees: userEmail }
       ]
     }).sort({ scheduledAt: -1 });
 

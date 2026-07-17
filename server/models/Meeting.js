@@ -34,6 +34,11 @@ const meetingSchema = new mongoose.Schema({
     enum: ['upcoming', 'ongoing', 'past', 'cancelled'],
     default: 'upcoming',
   },
+  invitees: [{
+    type: String,
+    lowercase: true,
+    trim: true,
+  }],
 }, {
   timestamps: true,
 });

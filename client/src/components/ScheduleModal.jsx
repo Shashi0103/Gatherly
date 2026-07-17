@@ -56,11 +56,19 @@ export default function ScheduleModal({ isOpen, onClose, onScheduleSuccess }) {
       const formattedHour = String(hr24).padStart(2, '0');
       const scheduledAt = new Date(`${date}T${formattedHour}:${minute}`);
 
+      // Auto-commit any typed email in the input field that wasn't committed with Enter/Space
+      let finalInvitees = [...emails];
+      const trimmedInput = emailInput.trim().toLowerCase();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (trimmedInput && emailRegex.test(trimmedInput) && !finalInvitees.includes(trimmedInput)) {
+        finalInvitees.push(trimmedInput);
+      }
+
       const response = await axios.post('/api/meetings', {
         title,
         scheduledAt,
         duration: Number(duration),
-        invitees: emails,
+        invitees: finalInvitees,
       });
 
       setScheduledMeeting(response.data);
