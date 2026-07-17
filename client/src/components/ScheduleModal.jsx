@@ -118,7 +118,7 @@ export default function ScheduleModal({ isOpen, onClose, onScheduleSuccess }) {
               </div>
 
               {/* Date and Time Row */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold text-textCol-secondary">Date</label>
                   <input
@@ -127,7 +127,7 @@ export default function ScheduleModal({ isOpen, onClose, onScheduleSuccess }) {
                     onChange={(e) => setDate(e.target.value)}
                     required
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full bg-surface-card border border-borderCol text-white focus:border-borderCol-focused"
+                    className="w-full bg-surface-card border border-borderCol text-white focus:border-borderCol-focused py-2.5 px-4 rounded-xl text-sm"
                   />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -137,7 +137,7 @@ export default function ScheduleModal({ isOpen, onClose, onScheduleSuccess }) {
                     <select
                       value={hour}
                       onChange={(e) => setHour(e.target.value)}
-                      className="w-full bg-surface-card border border-borderCol text-white focus:border-borderCol-focused py-2.5 px-3 text-sm rounded-xl focus:outline-none"
+                      className="w-full bg-surface-card border border-borderCol text-white focus:border-borderCol-focused py-2.5 px-2 md:px-3 text-xs sm:text-sm rounded-xl focus:outline-none"
                     >
                       {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((h) => (
                         <option key={h} value={h.padStart(2, '0')} className="text-black bg-white">
@@ -150,7 +150,7 @@ export default function ScheduleModal({ isOpen, onClose, onScheduleSuccess }) {
                     <select
                       value={minute}
                       onChange={(e) => setMinute(e.target.value)}
-                      className="w-full bg-surface-card border border-borderCol text-white focus:border-borderCol-focused py-2.5 px-3 text-sm rounded-xl focus:outline-none"
+                      className="w-full bg-surface-card border border-borderCol text-white focus:border-borderCol-focused py-2.5 px-2 md:px-3 text-xs sm:text-sm rounded-xl focus:outline-none"
                     >
                       {['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'].map((m) => (
                         <option key={m} value={m} className="text-black bg-white">
@@ -163,7 +163,7 @@ export default function ScheduleModal({ isOpen, onClose, onScheduleSuccess }) {
                     <select
                       value={ampm}
                       onChange={(e) => setAmpm(e.target.value)}
-                      className="w-full bg-surface-card border border-borderCol text-white focus:border-borderCol-focused py-2.5 px-3 text-sm rounded-xl focus:outline-none"
+                      className="w-full bg-surface-card border border-borderCol text-white focus:border-borderCol-focused py-2.5 px-2 md:px-3 text-xs sm:text-sm rounded-xl focus:outline-none"
                     >
                       <option value="AM" className="text-black bg-white">AM</option>
                       <option value="PM" className="text-black bg-white">PM</option>
