@@ -189,24 +189,24 @@ export default function Dashboard() {
 
         {/* Join Meeting & Search Block (Solid background - no gradients) */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2 glass-panel p-6 bg-surface-card flex items-center justify-between">
-            <div className="space-y-1.5 max-w-sm">
+          <div className="lg:col-span-2 glass-panel p-6 bg-surface-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1.5 w-full md:max-w-sm">
               <h3 className="text-md font-bold text-textCol-primary">Join with a code</h3>
               <p className="text-xs text-textCol-secondary">Enter a meeting code or invitation URL to jump straight into the call.</p>
             </div>
             
-            <form onSubmit={handleJoin} className="flex gap-2 relative max-w-sm w-full">
+            <form onSubmit={handleJoin} className="flex gap-2 relative w-full md:max-w-sm">
               <input
                 type="text"
                 placeholder="abc-defg-hij"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value)}
-                className="w-full text-sm bg-surface-card border border-borderCol pl-4 pr-16 py-2.5 rounded-xl text-textCol-primary outline-none"
+                className="w-full text-sm bg-surface-card border border-borderCol pl-4 pr-16 py-2.5 rounded-xl text-textCol-primary outline-none focus:border-blueAccent/50 focus:ring-2 focus:ring-blueAccent/10"
               />
               <button
                 type="submit"
                 disabled={!joinCode.trim()}
-                className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-greenAccent hover:bg-greenAccent-hover text-white rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+                className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-greenAccent hover:bg-greenAccent-hover text-white rounded-lg text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer"
               >
                 Join
               </button>
