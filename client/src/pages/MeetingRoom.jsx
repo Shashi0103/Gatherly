@@ -97,9 +97,9 @@ export default function MeetingRoom() {
     const isCurrentUserAdmin = (mongoUser?.uid === meetingHostId || mongoUser?._id === meetingHostId);
     const isUnstable = id === 'local' ? isLocalNetworkUnstable : (remoteStreams[id]?.connectionStatus === 'unstable');
     
-    // Append (Me) for the local user view
+    // Append (You) for the local user view
     const labelName = isLocal 
-      ? (displayName.includes('(Me)') ? displayName : `${displayName} (Me)`) 
+      ? (displayName.includes('(You)') ? displayName : `${displayName} (You)`) 
       : displayName;
     
     const cardClass = isSmall
