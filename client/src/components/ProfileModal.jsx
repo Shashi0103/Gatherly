@@ -45,7 +45,7 @@ export default function ProfileModal({ isOpen, onClose }) {
       setError('');
       setSuccess('');
     }
-  }, [isOpen, mongoUser]);
+  }, [isOpen]);
 
   // Helper to extract first letters of the name
   const getInitials = (name) => {
