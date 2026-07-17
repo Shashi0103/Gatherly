@@ -513,10 +513,14 @@ export default function MeetingRoom() {
       </header>
 
       {/* Dynamic Video Feeds Layout */}
-      <div className="flex-1 flex p-6 min-h-0 w-full justify-center items-center overflow-hidden relative">
+      <div className={`flex-1 flex min-h-0 w-full justify-center items-center overflow-hidden relative ${
+        isMobile && !pinnedUser ? 'p-0' : 'p-6'
+      }`}>
         {!pinnedUser ? (
           /* Standard Grid Layout */
-          <div className={`grid gap-5 w-full h-full justify-center content-center ${getGridClass()}`}>
+          <div className={`grid w-full h-full ${
+            isMobile ? 'justify-stretch items-stretch' : 'gap-5 justify-center content-center'
+          } ${getGridClass()}`}>
             {/* 1. Local Video Card */}
             {renderVideoCard(
               'local',
