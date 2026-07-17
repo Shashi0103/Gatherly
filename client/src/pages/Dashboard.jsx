@@ -43,12 +43,11 @@ export default function Dashboard() {
       const past = res.data.filter(m => {
         const start = new Date(m.scheduledAt).getTime();
         const end = start + m.duration * 60 * 1000;
-        const isInstant = m.title?.startsWith('Instant Meeting');
-        return (end <= now || m.status === 'past') && !isInstant;
+        return end <= now || m.status === 'past';
       }).length;
       
       setStats({
-        total: res.data.filter(m => !m.title?.startsWith('Instant Meeting')).length,
+        total: upcoming + past,
         upcoming,
         past
       });
@@ -160,8 +159,7 @@ export default function Dashboard() {
   const pastList = meetings.filter(m => {
     const start = new Date(m.scheduledAt).getTime();
     const end = start + m.duration * 60 * 1000;
-    const isInstant = m.title?.startsWith('Instant Meeting');
-    return (end <= new Date().getTime() || m.status === 'past') && !isInstant;
+    return end <= new Date().getTime() || m.status === 'past';
   });
 
   return (
