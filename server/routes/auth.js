@@ -48,6 +48,7 @@ router.post('/register', async (req, res) => {
         displayName: user.displayName,
         email: user.email,
         photoURL: user.photoURL,
+        dob: user.dob,
         createdAt: user.createdAt
       }
     });
@@ -89,6 +90,7 @@ router.post('/login', async (req, res) => {
         displayName: user.displayName,
         email: user.email,
         photoURL: user.photoURL,
+        dob: user.dob,
         createdAt: user.createdAt
       }
     });

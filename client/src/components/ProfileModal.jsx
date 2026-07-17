@@ -24,9 +24,18 @@ export default function ProfileModal({ isOpen, onClose }) {
       
       // Format Date string for HTML Date input (YYYY-MM-DD)
       if (mongoUser.dob) {
-        const dateObj = new Date(mongoUser.dob);
-        const formatted = dateObj.toISOString().split('T')[0];
-        setDob(formatted);
+        try {
+          const dateObj = new Date(mongoUser.dob);
+          if (!isNaN(dateObj.getTime())) {
+            const formatted = dateObj.toISOString().split('T')[0];
+            setDob(formatted);
+          } else {
+            setDob('');
+          }
+        } catch (err) {
+          console.error('Error parsing dob:', err);
+          setDob('');
+        }
       } else {
         setDob('');
       }

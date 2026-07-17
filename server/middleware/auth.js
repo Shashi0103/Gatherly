@@ -33,6 +33,7 @@ export const protect = async (req, res, next) => {
         displayName: user.displayName,
         email: user.email,
         photoURL: user.photoURL,
+        dob: user.dob,
       };
 
       next();
