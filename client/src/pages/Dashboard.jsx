@@ -377,7 +377,7 @@ export default function Dashboard() {
                     <div className="min-w-0 pr-4 space-y-1">
                       <h4 className="font-semibold text-sm text-textCol-primary truncate">{meet.title}</h4>
                       <span className="text-[10px] text-textCol-muted font-mono block">
-                        {new Date(meet.scheduledAt).toLocaleDateString([], { month: 'short', day: '2-digit', year: 'numeric' })}
+                        {new Date(meet.scheduledAt).toLocaleDateString([], { month: 'short', day: '2-digit', year: 'numeric' })} at {new Date(meet.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                     <span className="text-xs bg-surface-glass border border-borderCol px-2.5 py-1 rounded-lg text-textCol-secondary shrink-0 font-medium font-mono">
