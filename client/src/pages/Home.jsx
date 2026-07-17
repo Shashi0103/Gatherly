@@ -129,7 +129,7 @@ export default function Home() {
           </h1>
 
           <p className="text-lg text-textCol-secondary max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
-            Experience crystalline peer-to-peer audio, zero-latency screen sharing, and local high-quality MP4 meeting recording. No complex setups. No data tracking.
+            Connect instantly with high-fidelity video, zero-latency sharing, and secure built-in recording. Designed for simple and secure team collaboration.
           </p>
 
           {/* Join Meeting CTA Block */}
@@ -164,16 +164,16 @@ export default function Home() {
           {/* Stats Bar */}
           <div className="pt-8 grid grid-cols-3 gap-6 max-w-md mx-auto lg:mx-0 text-left border-t border-borderCol">
             <div>
-              <p className="text-2xl font-bold text-textCol-primary">Mesh</p>
+              <p className="text-2xl font-bold text-textCol-primary">Rooms</p>
               <p className="text-xs text-textCol-muted">Up to 6 participants</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-greenAccent">100%</p>
-              <p className="text-xs text-textCol-muted">Local Recording Privacy</p>
+              <p className="text-xs text-textCol-muted">Built-in Privacy</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-blueAccent">&lt; 100ms</p>
-              <p className="text-xs text-textCol-muted">Latency P2P Connection</p>
+              <p className="text-xs text-textCol-muted">Connection Latency</p>
             </div>
           </div>
         </motion.div>
