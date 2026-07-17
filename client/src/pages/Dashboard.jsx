@@ -33,9 +33,17 @@ export default function Dashboard() {
       setMeetings(res.data);
       
       // Calculate Stats
-      const now = new Date();
-      const upcoming = res.data.filter(m => new Date(m.scheduledAt) > now && m.status !== 'cancelled').length;
-      const past = res.data.filter(m => new Date(m.scheduledAt) <= now || m.status === 'past').length;
+      const now = new Date().getTime();
+      const upcoming = res.data.filter(m => {
+        const start = new Date(m.scheduledAt).getTime();
+        const end = start + m.duration * 60 * 1000;
+        return end > now && m.status !== 'cancelled' && m.status !== 'past';
+      }).length;
+      const past = res.data.filter(m => {
+        const start = new Date(m.scheduledAt).getTime();
+        const end = start + m.duration * 60 * 1000;
+        return end <= now || m.status === 'past';
+      }).length;
       
       setStats({
         total: res.data.length,
@@ -141,8 +149,16 @@ export default function Dashboard() {
     return 'Good evening';
   };
 
-  const upcomingList = meetings.filter(m => new Date(m.scheduledAt) > new Date() && m.status !== 'cancelled');
-  const pastList = meetings.filter(m => new Date(m.scheduledAt) <= new Date() || m.status === 'past');
+  const upcomingList = meetings.filter(m => {
+    const start = new Date(m.scheduledAt).getTime();
+    const end = start + m.duration * 60 * 1000;
+    return end > new Date().getTime() && m.status !== 'cancelled' && m.status !== 'past';
+  });
+  const pastList = meetings.filter(m => {
+    const start = new Date(m.scheduledAt).getTime();
+    const end = start + m.duration * 60 * 1000;
+    return end <= new Date().getTime() || m.status === 'past';
+  });
 
   return (
     <div className="min-h-screen bg-bg-primary flex text-textCol-primary overflow-hidden">
