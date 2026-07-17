@@ -13,6 +13,7 @@ const ICE_SERVERS = {
 
 export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
   const [localStream, setLocalStream] = useState(null);
+  const [facingMode, setFacingMode] = useState('user'); // 'user' (front) or 'environment' (back)
   const [remoteStreams, setRemoteStreams] = useState({});
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
@@ -51,7 +52,8 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
           video: {
             width: { ideal: 1280 },
             height: { ideal: 720 },
-            frameRate: { ideal: 30 }
+            frameRate: { ideal: 30 },
+            facingMode: 'user'
           }
         });
         
@@ -693,6 +695,55 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
     }
   };
 
+  const switchCamera = async () => {
+    if (!localStreamRef.current) return;
+    
+    try {
+      const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+      
+      // Stop existing video track(s)
+      const videoTracks = localStreamRef.current.getVideoTracks();
+      videoTracks.forEach(track => track.stop());
+      
+      // Acquire new video stream with target facingMode
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30 },
+          facingMode: newFacingMode
+        }
+      });
+      
+      const newVideoTrack = newStream.getVideoTracks()[0];
+      
+      // Replace video track in localStreamRef
+      const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
+      if (oldVideoTrack) {
+        localStreamRef.current.removeTrack(oldVideoTrack);
+      }
+      localStreamRef.current.addTrack(newVideoTrack);
+      
+      // Update localStream state to trigger re-renders
+      setLocalStream(new MediaStream(localStreamRef.current.getTracks()));
+      
+      // Replace video track on all peer connections
+      Object.values(pcsRef.current).forEach((pc) => {
+        const senders = pc.getSenders();
+        const videoSender = senders.find((s) => s.track && s.track.kind === 'video');
+        if (videoSender) {
+          videoSender.replaceTrack(newVideoTrack);
+        }
+      });
+      
+      setFacingMode(newFacingMode);
+      console.log(`📷 Switched camera facing mode to: ${newFacingMode}`);
+    } catch (err) {
+      console.error('Failed to switch camera:', err);
+    }
+  };
+
   const adminMuteUser = (targetSocketId) => {
     if (socketRef.current) {
       socketRef.current.emit('admin-mute-user', { roomId, targetSocketId });
@@ -728,5 +779,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined) => {
     toggleCamera,
     toggleScreenShare,
     sendChatMessage,
+    facingMode,
+    switchCamera,
   };
 };

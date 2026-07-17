@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mic, MicOff, Video, VideoOff, Monitor, MessageSquare, 
   PhoneOff, Radio, Play, Pause, Square, AlertCircle, Copy, Check,
-  Pin, PinOff
+  Pin, PinOff, RefreshCw
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -45,10 +45,20 @@ export default function MeetingRoom() {
     toggleCamera,
     toggleScreenShare,
     sendChatMessage,
+    facingMode,
+    switchCamera,
   } = useWebRTC(roomId, mongoUser?.uid || mongoUser?._id, mongoUser?.displayName, (peerName) => {
     setJoinAlert(`${peerName} joined the meeting`);
     setTimeout(() => setJoinAlert(''), 3000);
   });
+
+  // Track responsive screen sizing for mobile specific viewports
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Hook up Canvas + Web Audio API recorder
   const {
@@ -87,11 +97,17 @@ export default function MeetingRoom() {
     const isCurrentUserAdmin = (mongoUser?.uid === meetingHostId || mongoUser?._id === meetingHostId);
     const isUnstable = id === 'local' ? isLocalNetworkUnstable : (remoteStreams[id]?.connectionStatus === 'unstable');
     
+    const cardClass = isSmall
+      ? 'w-full shrink-0 border-borderCol rounded-2xl border aspect-video shadow-lg'
+      : (isMobile && !pinnedUser
+          ? 'w-full h-full !aspect-auto !rounded-none !border-0'
+          : 'w-full h-full rounded-2xl border aspect-video shadow-lg');
+
+    const shouldMirror = isLocal && (id === 'local' ? facingMode === 'user' : true);
+
     return (
       <div
-        className={`rounded-2xl overflow-hidden glass-panel bg-bg-secondary border relative aspect-video shadow-lg group flex flex-col justify-between transition-all duration-300 ${
-          isSmall ? 'w-full shrink-0 border-borderCol' : 'w-full h-full'
-        } ${
+        className={`overflow-hidden glass-panel bg-bg-secondary relative flex flex-col justify-between transition-all duration-300 ${cardClass} ${
           !isLocal && isMuted ? 'opacity-90' : 'opacity-100'
         } ${
           isSpeaking && !isMuted ? 'border-greenAccent speaking-indicator ring-4 ring-greenAccent/20' : 'border-borderCol'
@@ -108,7 +124,7 @@ export default function MeetingRoom() {
                 el.srcObject = stream;
               }
             }}
-            className={`w-full h-full object-cover rounded-2xl bg-bg-primary absolute inset-0 ${isLocal ? 'transform scale-x-[-1]' : ''}`}
+            className={`w-full h-full object-cover bg-bg-primary absolute inset-0 ${shouldMirror ? 'transform scale-x-[-1]' : ''}`}
           />
         )}
 
@@ -395,6 +411,13 @@ export default function MeetingRoom() {
 
   const getGridClass = () => {
     const total = 1 + Object.keys(remoteStreams).length;
+    if (isMobile) {
+      if (total === 1) return 'w-full h-full !p-0 !gap-0 grid-cols-1 grid-rows-1';
+      if (total === 2) return 'w-full h-full !p-0 !gap-0 grid-cols-1 grid-rows-2';
+      if (total <= 4) return 'w-full h-full !p-0 !gap-0 grid-cols-2 grid-rows-2';
+      if (total <= 6) return 'w-full h-full !p-0 !gap-0 grid-cols-2 grid-rows-3';
+      return 'w-full h-full !p-0 !gap-0 grid-cols-3 grid-rows-3';
+    }
     if (total === 1) return 'grid-cols-1 max-w-4xl';
     if (total === 2) return 'grid-cols-1 md:grid-cols-2 max-w-6xl';
     if (total <= 4) return 'grid-cols-1 md:grid-cols-2 max-w-6xl';
@@ -613,6 +636,17 @@ export default function MeetingRoom() {
             >
               {isCameraOff ? <VideoOff className="w-4.5 h-4.5 md:w-5 md:h-5" /> : <Video className="w-4.5 h-4.5 md:w-5 md:h-5" />}
             </button>
+
+            {/* Mobile Camera Switch (Front/Back) Button */}
+            {isMobile && !isCameraOff && (
+              <button
+                onClick={switchCamera}
+                className="w-10 h-10 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 text-white backdrop-blur-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
+                title="Switch Camera"
+              >
+                <RefreshCw className="w-4.5 h-4.5" />
+              </button>
+            )}
 
             {/* Screen Share Button */}
             <button
