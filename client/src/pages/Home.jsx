@@ -42,7 +42,7 @@ export default function Home() {
     {
       icon: <Video className="w-6 h-6 text-blueAccent" />,
       title: "HD Video Calls",
-      desc: "Connect in high-definition video and crystal-clear audio with up to 6 participants."
+      desc: "Connect in high-definition video and crystal-clear audio with up to 10 participants."
     },
     {
       icon: <Monitor className="w-6 h-6 text-greenAccent" />,
