@@ -165,7 +165,7 @@ export default function Home() {
           <div className="pt-8 grid grid-cols-3 gap-6 max-w-md mx-auto lg:mx-0 text-left border-t border-borderCol">
             <div>
               <p className="text-2xl font-bold text-textCol-primary">Rooms</p>
-              <p className="text-xs text-textCol-muted">Up to 6 participants</p>
+              <p className="text-xs text-textCol-muted">Up to 10 participants</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-greenAccent">100%</p>
