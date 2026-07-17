@@ -105,6 +105,14 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
       }
     });
 
+    // Listen for join error event (time interval & cancellation checks)
+    socket.on('join-error', ({ message }) => {
+      console.warn(`Join error: ${message}`);
+      if (onError) {
+        onError(message || 'Unable to join this meeting room.');
+      }
+    });
+
     // A. Received list of all existing users in the room
     socket.on('all-users', async (users) => {
       console.log('Received list of existing peers in room:', users);

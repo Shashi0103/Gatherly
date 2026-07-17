@@ -1,5 +1,6 @@
 import Message from '../models/Message.js';
 import User from '../models/User.js';
+import Meeting from '../models/Meeting.js';
 
 // Keep track of active users: socketId -> { userId, roomId }
 const activeConnections = new Map();
@@ -13,6 +14,47 @@ const configureSockets = (io) => {
       try {
         console.log(`👥 User ${userId} joining room ${roomId} via socket ${socket.id}`);
         
+        // Validate scheduled meeting time interval & status
+        const meeting = await Meeting.findOne({ meetingLink: roomId });
+        if (!meeting) {
+          console.log(`⚠️ Meeting ${roomId} not found in database. Rejecting user ${userId}`);
+          socket.emit('join-error', { message: 'This meeting room does not exist.' });
+          return;
+        }
+
+        if (meeting.status === 'cancelled') {
+          console.log(`⚠️ Meeting ${roomId} is cancelled. Rejecting user ${userId}`);
+          socket.emit('join-error', { message: 'This meeting has been cancelled.' });
+          return;
+        }
+
+        // Apply time-interval check only to other users (non-hosts)
+        const isHost = userId === meeting.hostId;
+        if (!isHost) {
+          const startTime = new Date(meeting.scheduledAt).getTime();
+          const durationMs = meeting.duration * 60 * 1000;
+          const endTime = startTime + durationMs;
+          const now = Date.now();
+
+          if (now < startTime) {
+            const timeStr = new Date(meeting.scheduledAt).toLocaleString();
+            console.log(`⚠️ Meeting ${roomId} has not started yet. Rejecting user ${userId}`);
+            socket.emit('join-error', { 
+              message: `This meeting has not started yet. It is scheduled to start at ${timeStr}.` 
+            });
+            return;
+          }
+
+          if (now > endTime) {
+            const timeStr = new Date(endTime).toLocaleString();
+            console.log(`⚠️ Meeting ${roomId} has already concluded. Rejecting user ${userId}`);
+            socket.emit('join-error', { 
+              message: `This meeting has already ended. It was scheduled to conclude by ${timeStr}.` 
+            });
+            return;
+          }
+        }
+
         // Enforce maximum 10 participants limit
         let room = io.sockets.adapter.rooms.get(roomId);
         if (room && room.size >= 10) {
