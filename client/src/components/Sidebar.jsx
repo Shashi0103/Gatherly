@@ -43,9 +43,7 @@ export default function Sidebar() {
         {/* Brand & Logo */}
         <div className="space-y-8">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-9 h-9 rounded-xl bg-blueAccent flex items-center justify-center shadow-md">
-              <Video className="w-4.5 h-4.5 text-white" />
-            </div>
+            <img src="/logo.png" alt="Gatherly Logo" width="36" height="36" className="w-9 h-9 object-contain rounded-xl shadow-md" />
             <span className="font-bold text-lg text-textCol-primary">Gatherly</span>
           </div>
 

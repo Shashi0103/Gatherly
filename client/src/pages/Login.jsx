@@ -159,9 +159,7 @@ export default function Login() {
         
         {/* Brand Header */}
         <div className="flex flex-col items-center mb-8 gap-3 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-12 h-12 rounded-2xl bg-blueAccent flex items-center justify-center shadow-lg shadow-blueAccent/15">
-            <Video className="w-6 h-6 text-white" />
-          </div>
+          <img src="/logo.png" alt="Gatherly Logo" width="48" height="48" className="w-12 h-12 object-contain rounded-2xl shadow-lg shadow-blueAccent/15" />
           <h2 className="text-2xl font-bold tracking-tight text-textCol-primary">Gatherly</h2>
           <p className="text-xs text-textCol-muted">Secure Lightweight Video Conferences</p>
         </div>

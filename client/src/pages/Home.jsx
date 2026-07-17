@@ -77,10 +77,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 glass-panel !rounded-none !border-t-0 !border-x-0 bg-bg-primary/60 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Solid color - no gradients */}
-            <div className="w-10 h-10 rounded-xl bg-blueAccent flex items-center justify-center shadow-md">
-              <Video className="w-5 h-5 text-white" />
-            </div>
+            <img src="/logo.png" alt="Gatherly Logo" width="40" height="40" className="w-10 h-10 object-contain rounded-xl shadow-md" />
             <span className="text-xl font-bold tracking-tight text-textCol-primary">Gatherly</span>
           </div>
 
@@ -330,9 +327,7 @@ export default function Home() {
       <footer className="border-t border-borderCol py-12 bg-bg-primary">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6 text-textCol-muted text-xs font-normal">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-blueAccent flex items-center justify-center">
-              <Video className="w-3 h-3 text-white" />
-            </div>
+            <img src="/logo.png" alt="Gatherly Logo" width="24" height="24" className="w-6 h-6 object-contain rounded-md" />
             <span className="font-semibold text-textCol-secondary text-sm">Gatherly</span>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-right">
