@@ -145,11 +145,11 @@ export default function MeetingRoom() {
                 className={`rounded-full object-cover border-2 shadow-inner ${
                   isLocal ? 'border-blueAccent' : 'border-greenAccent'
                 } ${
-                  isSmall ? 'w-10 h-10' : 'w-16 h-16'
+                  isSmall ? 'w-12 h-12' : 'w-24 h-24'
                 }`}
               />
             ) : (
-              <div className={`rounded-full flex items-center justify-center text-white font-bold ${isSmall ? 'w-10 h-10 text-sm' : 'w-16 h-16 text-xl'} ${isLocal ? 'bg-blueAccent' : 'bg-greenAccent'}`}>
+              <div className={`rounded-full flex items-center justify-center text-white font-bold ${isSmall ? 'w-12 h-12 text-sm' : 'w-24 h-24 text-2xl'} ${isLocal ? 'bg-blueAccent' : 'bg-greenAccent'}`}>
                 {getInitials(displayName)}
               </div>
             )}
