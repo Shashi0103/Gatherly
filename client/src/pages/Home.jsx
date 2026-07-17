@@ -164,7 +164,7 @@ export default function Home() {
           {/* Stats Bar */}
           <div className="pt-8 grid grid-cols-3 gap-6 max-w-md mx-auto lg:mx-0 text-left border-t border-borderCol">
             <div>
-              <p className="text-2xl font-bold text-textCol-primary">Rooms</p>
+              <p className="text-2xl font-bold text-textCol-primary">Meetings</p>
               <p className="text-xs text-textCol-muted">Up to 10 participants</p>
             </div>
             <div>
