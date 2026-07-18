@@ -684,10 +684,11 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
   const toggleScreenShare = async () => {
     try {
       if (!isScreenSharing) {
-        // Start screen share
+        // Start screen share - Disable audio capture on mobile to prevent crashes
+        const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
         const screenStream = await navigator.mediaDevices.getDisplayMedia({
           video: true,
-          audio: true,
+          audio: !isMobileDevice,
         });
 
         screenStreamRef.current = screenStream;
