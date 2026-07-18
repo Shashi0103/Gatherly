@@ -431,11 +431,19 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
 
     channel.onopen = () => {
       console.log(`🔒 Encrypted Data Channel open with peer ${socketId}`);
-      // Sync initial state
+      
+      // Sync initial state using real-time track states to avoid stale closures
+      const currentMuted = localStreamRef.current
+        ? localStreamRef.current.getAudioTracks().every((track) => !track.enabled)
+        : true;
+      const currentCameraOff = localStreamRef.current
+        ? localStreamRef.current.getVideoTracks().every((track) => !track.enabled)
+        : true;
+
       sendEncryptedData(socketId, {
         type: 'state-sync',
-        isMuted,
-        isCameraOff,
+        isMuted: currentMuted,
+        isCameraOff: currentCameraOff,
       });
     };
 
