@@ -215,9 +215,7 @@ export default function MeetingRoom() {
 
         {/* Admin Controls Overlay */}
         {isCurrentUserAdmin && !isLocal && (
-          <div className={`absolute top-2.5 right-11 z-20 flex items-center gap-1 bg-black/60 border border-white/10 p-1 rounded-xl backdrop-blur-md transition-opacity ${
-            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus-within:opacity-100'
-          }`}>
+          <div className="absolute top-2.5 right-11 z-20 flex items-center gap-1 bg-black/60 border border-white/10 p-1 rounded-xl backdrop-blur-md transition-opacity opacity-100">
             <button
               type="button"
               onClick={() => adminMuteUser(id)}
