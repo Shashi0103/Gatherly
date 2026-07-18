@@ -122,6 +122,9 @@ export default function MeetingRoom() {
 
     const shouldMirror = isLocal && (id === 'local' ? facingMode === 'user' : true);
 
+    const isRemoteMobile = !isLocal && remoteStreams[id]?.isMobileDevice;
+    const isLocalMobileOnRemoteDesktop = isRemoteMobile && !isMobile && !isScreenSharing;
+
     return (
       <div
         className={`overflow-hidden glass-panel bg-bg-secondary relative flex flex-col justify-between transition-all duration-300 ${cardClass} ${
@@ -145,7 +148,10 @@ export default function MeetingRoom() {
                 el.play().catch(() => {});
               }
             }}
-            className={`w-full h-full object-contain bg-bg-primary absolute inset-0 ${shouldMirror ? 'transform scale-x-[-1]' : ''}`}
+            style={{
+              transform: `${shouldMirror ? 'scaleX(-1)' : ''} ${isLocalMobileOnRemoteDesktop ? 'scale(1.08)' : ''}`.trim() || undefined
+            }}
+            className={`w-full h-full bg-bg-primary absolute inset-0 ${isLocalMobileOnRemoteDesktop ? 'object-cover' : 'object-contain'}`}
           />
         )}
 

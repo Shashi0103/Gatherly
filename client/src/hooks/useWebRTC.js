@@ -440,10 +440,12 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
         ? localStreamRef.current.getVideoTracks().every((track) => !track.enabled)
         : true;
 
+      const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       sendEncryptedData(socketId, {
         type: 'state-sync',
         isMuted: currentMuted,
         isCameraOff: currentCameraOff,
+        isMobileDevice,
       });
     };
 
@@ -475,6 +477,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
             ...prev[socketId],
             isMuted: payload.isMuted,
             isCameraOff: payload.isCameraOff,
+            isMobileDevice: payload.isMobileDevice,
           },
         };
       });
@@ -655,11 +658,12 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
         track.enabled = !nextMuteState;
       });
       setIsMuted(nextMuteState);
-      // Sync state with peers
+      const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       broadcastEncryptedData({
         type: 'state-sync',
         isMuted: nextMuteState,
         isCameraOff,
+        isMobileDevice,
       });
     }
   };
@@ -671,11 +675,12 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
         track.enabled = !nextCameraOffState;
       });
       setIsCameraOff(nextCameraOffState);
-      // Sync state with peers
+      const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       broadcastEncryptedData({
         type: 'state-sync',
         isMuted,
         isCameraOff: nextCameraOffState,
+        isMobileDevice,
       });
     }
   };
