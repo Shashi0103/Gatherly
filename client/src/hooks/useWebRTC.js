@@ -46,15 +46,25 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
         cryptoKeyRef.current = key;
         console.log('Derived AES-256 Data Channel encryption key.');
 
-        // Fetch User Media Streams
+        // Fetch User Media Streams with mobile-optimized constraints
+        const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const videoConstraints = isMobileDevice
+          ? {
+              width: { ideal: 640 },
+              height: { ideal: 360 },
+              frameRate: { ideal: 20 },
+              facingMode: 'user'
+            }
+          : {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              frameRate: { ideal: 30 },
+              facingMode: 'user'
+            };
+
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            frameRate: { ideal: 30 },
-            facingMode: 'user'
-          }
+          video: videoConstraints
         });
         
         if (isCancelled) {
@@ -758,15 +768,23 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
       const videoTracks = localStreamRef.current.getVideoTracks();
       videoTracks.forEach(track => track.stop());
       
-      // Acquire new video stream with target facingMode
+      // Acquire new video stream with target facingMode and optimized constraints
+      const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       const newStream = await navigator.mediaDevices.getUserMedia({
         audio: false,
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 },
-          facingMode: newFacingMode
-        }
+        video: isMobileDevice
+          ? {
+              width: { ideal: 640 },
+              height: { ideal: 360 },
+              frameRate: { ideal: 20 },
+              facingMode: newFacingMode
+            }
+          : {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              frameRate: { ideal: 30 },
+              facingMode: newFacingMode
+            }
       });
       
       const newVideoTrack = newStream.getVideoTracks()[0];

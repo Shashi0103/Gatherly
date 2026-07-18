@@ -139,7 +139,7 @@ export default function MeetingRoom() {
                 el.srcObject = stream;
               }
             }}
-            className={`w-full h-full object-cover bg-bg-primary absolute inset-0 ${shouldMirror ? 'transform scale-x-[-1]' : ''}`}
+            className={`w-full h-full object-contain bg-bg-primary absolute inset-0 ${shouldMirror ? 'transform scale-x-[-1]' : ''}`}
           />
         )}
 
