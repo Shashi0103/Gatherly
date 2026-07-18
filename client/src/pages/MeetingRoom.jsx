@@ -115,7 +115,9 @@ export default function MeetingRoom() {
           ? 'w-full h-full border-borderCol rounded-2xl border !aspect-auto shadow-lg'
           : 'w-full shrink-0 border-borderCol rounded-2xl border aspect-video shadow-lg')
       : (isMobile && !pinnedUser
-          ? 'w-full h-full !aspect-auto !rounded-none !border-0'
+          ? (totalParticipants === 1
+              ? 'w-full h-full border-borderCol rounded-2xl border !aspect-auto shadow-lg bg-bg-secondary'
+              : 'w-full h-full !aspect-auto !rounded-none !border-0')
           : 'w-full h-full rounded-2xl border aspect-video shadow-lg');
 
     const shouldMirror = isLocal && (id === 'local' ? facingMode === 'user' : true);
@@ -213,7 +215,9 @@ export default function MeetingRoom() {
 
         {/* Admin Controls Overlay */}
         {isCurrentUserAdmin && !isLocal && (
-          <div className="absolute top-2.5 right-11 z-20 flex items-center gap-1 bg-black/60 border border-white/10 p-1 rounded-xl backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className={`absolute top-2.5 right-11 z-20 flex items-center gap-1 bg-black/60 border border-white/10 p-1 rounded-xl backdrop-blur-md transition-opacity ${
+            isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus-within:opacity-100'
+          }`}>
             <button
               type="button"
               onClick={() => adminMuteUser(id)}
@@ -443,7 +447,7 @@ export default function MeetingRoom() {
   const getGridClass = (overrideCount = null) => {
     const total = overrideCount !== null ? overrideCount : (1 + Object.keys(remoteStreams).length);
     if (isMobile) {
-      if (total === 1) return 'w-full h-full !p-0 !gap-0 grid-cols-1 grid-rows-1';
+      if (total === 1) return 'w-full h-[calc(100%-80px)] !p-4 !gap-0 grid-cols-1 grid-rows-1';
       if (total === 2) return 'w-full h-full !p-0 !gap-0 grid-cols-1 grid-rows-2';
       if (total <= 4) return 'w-full h-full !p-0 !gap-0 grid-cols-2 grid-rows-2';
       if (total <= 6) return 'w-full h-full !p-0 !gap-0 grid-cols-2 grid-rows-3';
@@ -472,7 +476,7 @@ export default function MeetingRoom() {
   }
 
   return (
-    <div className="h-screen w-screen bg-bg-primary overflow-hidden relative flex flex-col justify-between pt-4 px-4 pb-2.5 text-textCol-primary selection:bg-greenAccent/20">
+    <div className="h-screen h-[100dvh] w-screen bg-bg-primary overflow-hidden relative flex flex-col justify-between pt-4 px-4 pb-2.5 text-textCol-primary selection:bg-greenAccent/20">
       
       {/* Participant Join Toast Notification */}
       <AnimatePresence>
