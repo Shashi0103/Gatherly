@@ -721,6 +721,15 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
       }
     } catch (err) {
       console.error('Error starting screen share:', err);
+      const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobileDevice) {
+        alert("Mobile browsers (including Chrome and Safari) do not support screen sharing due to mobile operating system security restrictions. Please join the meeting from a laptop or desktop computer to share your screen.");
+      } else {
+        // Only alert desktop users if the error is not a user cancellation
+        if (err.name !== 'NotAllowedError') {
+          alert("Failed to start screen share. Please verify that this browser tab has screen capture permissions.");
+        }
+      }
     }
   };
 
