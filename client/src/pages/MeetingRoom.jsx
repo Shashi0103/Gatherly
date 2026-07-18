@@ -364,6 +364,15 @@ export default function MeetingRoom() {
 
 
 
+  // Helper to check if a user ID matches the current user (handles both uid and MongoDB _id)
+  const isCurrentUser = (id) => {
+    if (!id || !mongoUser) return false;
+    const targetId = id.toString();
+    const myUid = mongoUser.uid ? mongoUser.uid.toString() : '';
+    const myId = mongoUser._id ? mongoUser._id.toString() : '';
+    return targetId === myUid || targetId === myId;
+  };
+
   // Unread chat counter logic
   const prevMessagesLength = useRef(0);
   useEffect(() => {
@@ -378,10 +387,9 @@ export default function MeetingRoom() {
       setUnreadChatCount(0);
     } else if (chatMessages.length > prevMessagesLength.current) {
       const latestMsg = chatMessages[chatMessages.length - 1];
-      const currentUserId = mongoUser?.uid || mongoUser?._id;
       
       // Only increment unread count if the message is from another participant
-      if (latestMsg && latestMsg.senderId !== currentUserId) {
+      if (latestMsg && !isCurrentUser(latestMsg.senderId)) {
         const diff = chatMessages.length - prevMessagesLength.current;
         console.log(`🔴 Incrementing unread count by ${diff} for incoming message`);
         setUnreadChatCount(prev => prev + diff);
@@ -396,11 +404,10 @@ export default function MeetingRoom() {
   useEffect(() => {
     if (chatMessages.length > prevMessagesRef.current.length) {
       const latestMsg = chatMessages[chatMessages.length - 1];
-      const currentUserId = mongoUser?.uid || mongoUser?._id;
       
       // If the message is not sent by us and the chat drawer is closed, trigger toast
-      if (latestMsg && latestMsg.senderId !== currentUserId && !isChatOpen) {
-        const isPrivate = latestMsg.recipientId === currentUserId;
+      if (latestMsg && !isCurrentUser(latestMsg.senderId) && !isChatOpen) {
+        const isPrivate = isCurrentUser(latestMsg.recipientId);
         const isBroadcast = !latestMsg.recipientId;
         
         if (isPrivate || isBroadcast) {
