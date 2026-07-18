@@ -116,7 +116,7 @@ export default function MeetingRoom() {
           : 'w-full shrink-0 border-borderCol rounded-2xl border aspect-video shadow-lg')
       : (isMobile && !pinnedUser
           ? (totalParticipants === 1
-              ? 'w-[85%] max-w-[420px] mx-auto h-full border-borderCol rounded-2xl border !aspect-auto shadow-lg bg-bg-secondary'
+              ? 'w-[94%] mx-auto aspect-[3/4] self-center border-borderCol rounded-2xl border shadow-lg bg-bg-secondary'
               : 'w-full h-full !aspect-auto !rounded-none !border-0')
           : 'w-full h-full rounded-2xl border aspect-video shadow-lg');
 
