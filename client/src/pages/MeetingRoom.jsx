@@ -130,7 +130,7 @@ export default function MeetingRoom() {
           isSpeaking && !isMuted ? 'border-greenAccent speaking-indicator ring-4 ring-greenAccent/20' : 'border-borderCol'
         } ${extraClass}`}
       >
-        {stream && !isCameraOff && (
+        {stream && (!isCameraOff || isScreenSharing) && (
           <video
             key={`${id}-${isCameraOff}`}
             id={`video-feed-${id}`}
@@ -150,7 +150,7 @@ export default function MeetingRoom() {
         )}
 
         {/* Video Muted Overlay Placeholder */}
-        {isCameraOff && (
+        {isCameraOff && !isScreenSharing && (
           <div className="absolute inset-0 bg-bg-secondary flex flex-col items-center justify-center gap-3">
             {photoURL ? (
               <img 

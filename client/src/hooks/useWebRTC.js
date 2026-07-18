@@ -682,14 +682,19 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
 
   // Screen Sharing
   const toggleScreenShare = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      alert("Screen sharing is not supported on this browser or device. Please use a modern desktop browser (like Chrome, Safari, or Edge) or a compatible mobile browser.");
+      return;
+    }
     try {
       if (!isScreenSharing) {
-        // Start screen share - Disable audio capture on mobile to prevent crashes
+        // Start screen share - Omit audio constraints on mobile to prevent crashes
         const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({
-          video: true,
-          audio: !isMobileDevice,
-        });
+        const constraints = isMobileDevice
+          ? { video: true }
+          : { video: true, audio: true };
+
+        const screenStream = await navigator.mediaDevices.getDisplayMedia(constraints);
 
         screenStreamRef.current = screenStream;
         setIsScreenSharing(true);
