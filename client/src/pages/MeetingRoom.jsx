@@ -116,7 +116,7 @@ export default function MeetingRoom() {
           : 'w-full shrink-0 border-borderCol rounded-2xl border aspect-video shadow-lg')
       : (isMobile && !pinnedUser
           ? (totalParticipants === 1
-              ? 'w-[94%] mx-auto aspect-[3/4] self-center border-borderCol rounded-2xl border shadow-lg bg-bg-secondary'
+              ? 'w-full h-full !aspect-auto !rounded-none !border-0 bg-bg-secondary'
               : 'w-full h-full !aspect-auto !rounded-none !border-0')
           : 'w-full h-full rounded-2xl border aspect-video shadow-lg');
 
@@ -136,7 +136,7 @@ export default function MeetingRoom() {
             id={`video-feed-${id}`}
             autoPlay
             playsInline
-            muted={isLocal}
+            muted={true} // Always muted to prevent browser autoplay blocks on non-muted elements
             ref={(el) => {
               if (el && stream) {
                 if (el.srcObject !== stream) {
@@ -209,9 +209,7 @@ export default function MeetingRoom() {
             wasAutoPinnedRef.current = false;
             setPinnedUser(isPinned ? null : id);
           }}
-          className={`absolute top-2.5 right-2.5 z-20 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all cursor-pointer ${
-            isPinned ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100'
-          }`}
+          className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all cursor-pointer opacity-100"
           title={isPinned ? "Unpin user" : "Pin user"}
         >
           {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
@@ -959,12 +957,11 @@ export default function MeetingRoom() {
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Hidden audio feeds for remote participants with camera off */}
+      {/* Dedicated audio feeds for remote participants */}
       <div className="hidden">
         {Object.keys(remoteStreams).map((socketId) => {
           const peer = remoteStreams[socketId];
-          const isCameraOff = peer.isCameraOff || !peer.stream;
-          return peer.stream && isCameraOff ? (
+          return peer.stream ? (
             <audio
               key={`audio-feed-${socketId}`}
               autoPlay
