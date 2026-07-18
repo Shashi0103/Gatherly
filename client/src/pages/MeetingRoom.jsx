@@ -332,33 +332,32 @@ export default function MeetingRoom() {
   }, []);
 
   // Auto-pin screen sharing
-  const wasAutoPinnedRef = useRef(false);
+  const wasAutoPinnedRef = useRef(null); // Stores the socketId/key of the auto-pinned user
   useEffect(() => {
-    // 1. Check if local user is screen sharing
+    // 1. Identify who is currently screen sharing (local has priority)
+    let sharingId = null;
     if (isScreenSharing) {
-      if (pinnedUser !== 'local') {
-        setPinnedUser('local');
-        wasAutoPinnedRef.current = true;
-      }
-      return;
+      sharingId = 'local';
+    } else {
+      sharingId = Object.keys(remoteStreams).find(
+        (socketId) => remoteStreams[socketId]?.isScreenSharing
+      ) || null;
     }
 
-    // 2. Check if any remote peer is screen sharing
-    const sharingPeerId = Object.keys(remoteStreams).find(
-      (socketId) => remoteStreams[socketId].isScreenSharing
-    );
-
-    if (sharingPeerId) {
-      if (pinnedUser !== sharingPeerId) {
-        setPinnedUser(sharingPeerId);
-        wasAutoPinnedRef.current = true;
+    if (sharingId) {
+      // If someone is sharing, and they are not currently pinned:
+      // We only auto-pin them if the user hasn't manually pinned someone else in the meantime
+      if (pinnedUser !== sharingId && !wasAutoPinnedRef.current) {
+        setPinnedUser(sharingId);
+        wasAutoPinnedRef.current = sharingId;
       }
     } else {
-      // If the current pinned user was screen sharing, but they stopped, and they were auto-pinned, unpin them
-      if (wasAutoPinnedRef.current) {
+      // No one is screen sharing anymore.
+      // If the currently pinned user is the one we auto-pinned, unpin them now.
+      if (wasAutoPinnedRef.current && pinnedUser === wasAutoPinnedRef.current) {
         setPinnedUser(null);
-        wasAutoPinnedRef.current = false;
       }
+      wasAutoPinnedRef.current = null;
     }
   }, [remoteStreams, isScreenSharing, pinnedUser]);
 
@@ -709,9 +708,11 @@ export default function MeetingRoom() {
           )
         ) : (
           /* Pinned Speaker / Speaker Zoom Layout */
-          <div className="flex w-full h-full gap-5 overflow-hidden">
+          <div className={`flex w-full h-full gap-5 overflow-hidden ${
+            isMobile ? 'flex-col justify-end' : 'flex-row'
+          }`}>
             {/* Main Stage (Zoomed Pinned User) */}
-            <div className="flex-1 h-full min-w-0">
+            <div className="flex-1 min-h-0 min-w-0">
               {pinnedUser === 'local'
                 ? renderVideoCard(
                     'local',
@@ -722,7 +723,8 @@ export default function MeetingRoom() {
                     isScreenSharing,
                     true,
                     false,
-                    mongoUser?.photoURL
+                    mongoUser?.photoURL,
+                    ''
                   )
                 : (() => {
                     const peer = remoteStreams[pinnedUser];
@@ -736,46 +738,94 @@ export default function MeetingRoom() {
                           peer.isScreenSharing,
                           false,
                           false,
-                          peer.photoURL
+                          peer.photoURL,
+                          ''
                         )
                       : null;
                   })()}
             </div>
 
             {/* Sidebar Thumbnails List (Scrollable column for other participants) */}
-            <div className="w-64 shrink-0 flex flex-col gap-4 overflow-y-auto pr-1">
-              {/* Show Local in sidebar if not pinned */}
-              {pinnedUser !== 'local' &&
-                renderVideoCard(
-                  'local',
-                  localStream,
-                  mongoUser?.displayName || 'You',
-                  isMuted,
-                  isCameraOff,
-                  isScreenSharing,
-                  true,
-                  true,
-                  mongoUser?.photoURL
-                )}
+            {isMobile ? (
+              /* Horizontal Scroll panel for Mobile Devices in Pinned View */
+              <div className="w-full h-28 shrink-0 overflow-x-auto py-2 mb-20 z-10">
+                <div className="flex gap-3 h-24 w-max px-2">
+                  {/* Show Local in sidebar if not pinned */}
+                  {pinnedUser !== 'local' && (
+                    <div className="w-32 shrink-0 h-full">
+                      {renderVideoCard(
+                        'local',
+                        localStream,
+                        mongoUser?.displayName || 'You',
+                        isMuted,
+                        isCameraOff,
+                        isScreenSharing,
+                        true,
+                        true,
+                        mongoUser?.photoURL
+                      )}
+                    </div>
+                  )}
 
-              {/* Show Remotes in sidebar if not pinned */}
-              {Object.keys(remoteStreams)
-                .filter((socketId) => socketId !== pinnedUser)
-                .map((socketId) => {
-                  const peer = remoteStreams[socketId];
-                  return renderVideoCard(
-                    socketId,
-                    peer.stream,
-                    peer.displayName || 'Participant',
-                    peer.isMuted,
-                    peer.isCameraOff || !peer.stream,
-                    peer.isScreenSharing,
-                    false,
+                  {/* Show Remotes in sidebar if not pinned */}
+                  {Object.keys(remoteStreams)
+                    .filter((socketId) => socketId !== pinnedUser)
+                    .map((socketId) => {
+                      const peer = remoteStreams[socketId];
+                      return (
+                        <div key={socketId} className="w-32 shrink-0 h-full">
+                          {renderVideoCard(
+                            socketId,
+                            peer.stream,
+                            peer.displayName || 'Participant',
+                            peer.isMuted,
+                            peer.isCameraOff || !peer.stream,
+                            peer.isScreenSharing,
+                            false,
+                            true,
+                            peer.photoURL
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            ) : (
+              /* Vertical Scroll panel for Desktop/Laptops in Pinned View */
+              <div className="w-64 shrink-0 flex flex-col gap-4 overflow-y-auto pr-1">
+                {/* Show Local in sidebar if not pinned */}
+                {pinnedUser !== 'local' &&
+                  renderVideoCard(
+                    'local',
+                    localStream,
+                    mongoUser?.displayName || 'You',
+                    isMuted,
+                    isCameraOff,
+                    isScreenSharing,
                     true,
-                    peer.photoURL
-                  );
-                })}
-            </div>
+                    true,
+                    mongoUser?.photoURL
+                  )}
+
+                {/* Show Remotes in sidebar if not pinned */}
+                {Object.keys(remoteStreams)
+                  .filter((socketId) => socketId !== pinnedUser)
+                  .map((socketId) => {
+                    const peer = remoteStreams[socketId];
+                    return renderVideoCard(
+                      socketId,
+                      peer.stream,
+                      peer.displayName || 'Participant',
+                      peer.isMuted,
+                      peer.isCameraOff || !peer.stream,
+                      peer.isScreenSharing,
+                      false,
+                      true,
+                      peer.photoURL
+                    );
+                  })}
+              </div>
+            )}
           </div>
         )}
 
