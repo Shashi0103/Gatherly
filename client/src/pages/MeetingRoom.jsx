@@ -149,9 +149,9 @@ export default function MeetingRoom() {
               }
             }}
             style={{
-              transform: `${shouldMirror ? 'scaleX(-1)' : ''} ${isLocalMobileOnRemoteDesktop ? 'scale(1.08)' : ''}`.trim() || undefined
+              transform: `${shouldMirror ? 'scaleX(-1)' : ''} ${isLocalMobileOnRemoteDesktop ? 'scale(1.4)' : ''}`.trim() || undefined
             }}
-            className={`w-full h-full bg-bg-primary absolute inset-0 ${isLocalMobileOnRemoteDesktop ? 'object-cover' : 'object-contain'}`}
+            className="w-full h-full bg-bg-primary absolute inset-0 object-contain"
           />
         )}
 

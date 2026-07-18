@@ -687,6 +687,11 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
 
   // Screen Sharing
   const toggleScreenShare = async () => {
+    const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobileDevice) {
+      alert("Mobile browsers (including Chrome and Safari) do not support screen sharing due to mobile operating system security restrictions. Please join the meeting from a laptop or desktop computer to share your screen.");
+      return;
+    }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
       alert("Screen sharing is not supported on this browser or device. Please use a modern desktop browser (like Chrome, Safari, or Edge) or a compatible mobile browser.");
       return;
