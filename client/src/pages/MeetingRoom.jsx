@@ -20,7 +20,8 @@ export default function MeetingRoom() {
   const [meetingTitle, setMeetingTitle] = useState('Gatherly Meeting');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [unreadChatCount, setUnreadChatCount] = useState(0);
-  const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
   const [meetingError, setMeetingError] = useState('');
   const [pinnedUser, setPinnedUser] = useState(null);
   const [meetingHostId, setMeetingHostId] = useState('');
@@ -449,8 +450,14 @@ export default function MeetingRoom() {
   const handleCopyLink = () => {
     const fullUrl = `${window.location.origin}/meet/${roomId}`;
     navigator.clipboard.writeText(fullUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(roomId?.toLowerCase() || '');
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
   };
 
   const handleLeave = () => {
@@ -591,17 +598,35 @@ export default function MeetingRoom() {
       
       {/* Top Header Row */}
       <header className="z-10 flex items-center justify-between px-4 py-3 glass-panel !bg-surface-glass !rounded-xl">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
           <h2 className="font-bold text-textCol-primary text-md line-clamp-1">{meetingTitle}</h2>
-          <span className="w-1.5 h-1.5 rounded-full bg-borderCol"></span>
-          <span className="text-xs text-textCol-muted font-mono select-all uppercase tracking-wider">{roomId}</span>
-          <button 
-            onClick={handleCopyLink} 
-            className="p-1 rounded bg-surface-glass border border-borderCol hover:border-blueAccent/20 text-textCol-secondary hover:text-textCol-primary transition-colors"
-            title="Copy Meeting URL"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-greenAccent" /> : <Copy className="w-3.5 h-3.5" />}
-          </button>
+          <span className="w-1.5 h-1.5 rounded-full bg-borderCol hidden sm:inline-block"></span>
+          
+          <div className="flex items-center gap-3">
+            {/* Invitation URL Copy Section */}
+            <div className="flex items-center gap-1.5 bg-black/35 border border-white/10 px-2.5 py-1 rounded-lg text-xs">
+              <span className="text-textCol-secondary font-medium">Link</span>
+              <button 
+                onClick={handleCopyLink} 
+                className="p-1 rounded hover:bg-white/10 text-textCol-secondary hover:text-textCol-primary transition-colors cursor-pointer"
+                title="Copy Invitation Link"
+              >
+                {copiedLink ? <Check className="w-3.5 h-3.5 text-greenAccent" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            {/* Meeting Code Copy Section */}
+            <div className="flex items-center gap-1.5 bg-black/35 border border-white/10 px-2.5 py-1 rounded-lg text-xs">
+              <span className="text-textCol-muted font-mono lowercase select-all">{roomId?.toLowerCase()}</span>
+              <button 
+                onClick={handleCopyCode} 
+                className="p-1 rounded hover:bg-white/10 text-textCol-secondary hover:text-textCol-primary transition-colors cursor-pointer"
+                title="Copy Meeting Code"
+              >
+                {copiedCode ? <Check className="w-3.5 h-3.5 text-greenAccent" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Recording status banner */}
