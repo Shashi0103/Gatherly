@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, Calendar, Plus, Link as LinkIcon, Trash2, Users, Clock, Play, Search, Activity, Sparkles, Check } from 'lucide-react';
+import { Video, Calendar, Plus, Link as LinkIcon, Trash2, Users, Clock, Play, Search, Activity, Sparkles, Check, Copy } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
