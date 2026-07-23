@@ -11,7 +11,7 @@ const ICE_SERVERS = {
   ],
 };
 
-export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) => {
+export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError, photoURL) => {
   const [localStream, setLocalStream] = useState(null);
   const [facingMode, setFacingMode] = useState('user'); // 'user' (front) or 'environment' (back)
   const [remoteStreams, setRemoteStreams] = useState({});
@@ -31,6 +31,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
   const cryptoKeyRef = useRef(null);
   const localAnalysersRef = useRef({ mic: null, interval: null });
   const peerAnalysersRef = useRef({}); // socketId -> { analyser, interval }
+  const iceCandidatesQueueRef = useRef({}); // socketId -> queued candidates array
 
   // 1. Initialize Encryption Key and Media Streams
   useEffect(() => {
@@ -90,7 +91,12 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
           withCredentials: true
         });
 
-        socketRef.current.emit('join-room', { roomId, userId });
+        socketRef.current.emit('join-room', { 
+          roomId, 
+          userId, 
+          displayName: displayName || 'Demo User', 
+          photoURL: photoURL || '' 
+        });
 
         // Bind Signaling Socket Events
         bindSocketEvents();
@@ -110,6 +116,22 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
   // Bind Signaling events
   const bindSocketEvents = () => {
     const socket = socketRef.current;
+
+    const processQueuedCandidates = async (sender) => {
+      const pc = pcsRef.current[sender];
+      const queue = iceCandidatesQueueRef.current[sender];
+      if (pc && queue && queue.length > 0) {
+        console.log(`Processing ${queue.length} queued ICE candidates for peer ${sender}`);
+        for (const candidate of queue) {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (err) {
+            console.error('Error adding queued ICE candidate:', err);
+          }
+        }
+        iceCandidatesQueueRef.current[sender] = [];
+      }
+    };
 
     // Listen for room full event
     socket.on('room-full', ({ message }) => {
@@ -247,6 +269,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
       // Handle offer
       try {
         await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+        await processQueuedCandidates(sender);
         const answer = await pc.createAnswer();
         const mungedSDP = preferCodecs(answer.sdp);
         await pc.setLocalDescription({ type: 'answer', sdp: mungedSDP });
@@ -263,6 +286,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
       if (pc) {
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+          await processQueuedCandidates(sender);
         } catch (err) {
           console.error('Error setting remote description from answer:', sender, err);
         }
@@ -272,12 +296,17 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
     // E. Received ICE Candidate from a peer
     socket.on('ice-candidate', async ({ sender, candidate }) => {
       const pc = pcsRef.current[sender];
-      if (pc) {
+      if (pc && pc.remoteDescription && pc.remoteDescription.type) {
         try {
           await pc.addIceCandidate(new RTCIceCandidate(candidate));
         } catch (err) {
           // Ignore transient candidate failures during renegotiations
         }
+      } else {
+        if (!iceCandidatesQueueRef.current[sender]) {
+          iceCandidatesQueueRef.current[sender] = [];
+        }
+        iceCandidatesQueueRef.current[sender].push(candidate);
       }
     });
 
@@ -629,6 +658,9 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError) =>
     if (peerAnalysersRef.current[socketId]) {
       clearInterval(peerAnalysersRef.current[socketId].interval);
       delete peerAnalysersRef.current[socketId];
+    }
+    if (iceCandidatesQueueRef.current[socketId]) {
+      delete iceCandidatesQueueRef.current[socketId];
     }
 
     setRemoteStreams((prev) => {

@@ -57,7 +57,8 @@ export default function MeetingRoom() {
     },
     (errMsg) => {
       setMeetingError(errMsg);
-    }
+    },
+    mongoUser?.photoURL
   );
 
   // Track responsive screen sizing for mobile specific viewports
@@ -178,9 +179,9 @@ export default function MeetingRoom() {
         )}
 
         {/* User Name Label Overlay (Top) */}
-        <div className="z-10 p-2.5 bg-black/40 flex items-center justify-between rounded-t-2xl">
+        <div className="relative z-30 p-2.5 bg-black/60 flex items-center justify-between rounded-t-2xl">
           <div className="flex items-center gap-2 min-w-0">
-            <span className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-white font-semibold line-clamp-1`}>
+            <span className={`${isSmall ? 'text-[10px] max-w-[100px]' : 'text-xs max-w-[150px] md:max-w-[200px]'} text-white font-semibold truncate block`}>
               {labelName} {isScreenSharing && ' (Sharing)'}
             </span>
             {isParticipantAdmin && (
@@ -215,7 +216,7 @@ export default function MeetingRoom() {
             wasAutoPinnedRef.current = false;
             setPinnedUser(isPinned ? null : id);
           }}
-          className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all cursor-pointer opacity-100"
+          className="absolute top-2.5 right-2.5 z-40 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 border border-white/10 hover:border-white/20 text-white/80 hover:text-white transition-all cursor-pointer opacity-100"
           title={isPinned ? "Unpin user" : "Pin user"}
         >
           {isPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
@@ -223,7 +224,7 @@ export default function MeetingRoom() {
 
         {/* Admin Controls Overlay */}
         {isCurrentUserAdmin && !isLocal && (
-          <div className="absolute top-2.5 right-11 z-20 flex items-center gap-1 bg-black/60 border border-white/10 p-1 rounded-xl backdrop-blur-md transition-opacity opacity-100">
+          <div className="absolute top-2.5 right-11 z-40 flex items-center gap-1 bg-black/60 border border-white/10 p-1 rounded-xl backdrop-blur-md transition-opacity opacity-100">
             <button
               type="button"
               onClick={() => adminMuteUser(id)}
@@ -586,8 +587,11 @@ export default function MeetingRoom() {
               {/* 2. Remote Video Cards */}
               {Object.keys(remoteStreams).map((socketId, index) => {
                 const peer = remoteStreams[socketId];
-                const isThirdItem = (index + 1) === 2; // local is 0, peer 1 is 1, peer 2 is 2
-                const isThirdItemOfThreeOnMobile = isMobile && totalParticipants === 3 && isThirdItem;
+                const isThirdItem = index === 1; // 2nd remote is the 3rd participant
+                const isThirdItemOfThree = totalParticipants === 3 && isThirdItem;
+                const extraGridClass = isThirdItemOfThree
+                  ? 'col-span-2 justify-self-center w-full max-w-[50%] md:max-w-[calc(50%-0.625rem)]'
+                  : '';
                 return renderVideoCard(
                   socketId,
                   peer.stream,
@@ -598,7 +602,7 @@ export default function MeetingRoom() {
                   false,
                   false,
                   peer.photoURL,
-                  isThirdItemOfThreeOnMobile ? 'col-span-2' : ''
+                  extraGridClass
                 );
               })}
             </div>

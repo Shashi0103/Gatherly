@@ -10,9 +10,9 @@ const configureSockets = (io) => {
     console.log(`🔌 Client connected: ${socket.id}`);
 
     // 1. Join Room
-    socket.on('join-room', async ({ roomId, userId }) => {
+    socket.on('join-room', async ({ roomId, userId, displayName, photoURL }) => {
       try {
-        console.log(`👥 User ${userId} joining room ${roomId} via socket ${socket.id}`);
+        console.log(`👥 User ${userId} (${displayName}) joining room ${roomId} via socket ${socket.id}`);
         
         // Validate scheduled meeting time interval & status
         const meeting = await Meeting.findOne({ meetingLink: roomId });
@@ -64,7 +64,7 @@ const configureSockets = (io) => {
         }
 
         socket.join(roomId);
-        activeConnections.set(socket.id, { userId, roomId });
+        activeConnections.set(socket.id, { userId, roomId, displayName, photoURL });
 
         // Fetch user profiles for other sockets in this room
         room = io.sockets.adapter.rooms.get(roomId);
@@ -75,26 +75,22 @@ const configureSockets = (io) => {
             if (otherSocketId !== socket.id) {
               const conn = activeConnections.get(otherSocketId);
               if (conn) {
-                // Fetch basic user info from MongoDB to share with the newcomer
-                const userInfo = await User.findOne({ uid: conn.userId });
                 usersInRoom.push({
                   socketId: otherSocketId,
                   userId: conn.userId,
-                  displayName: userInfo?.displayName || 'Demo User',
-                  photoURL: userInfo?.photoURL || ''
+                  displayName: conn.displayName || 'Demo User',
+                  photoURL: conn.photoURL || ''
                 });
               }
             }
           }
         }
 
-        // Fetch joining user's profile to broadcast to existing users
-        const joiningUser = await User.findOne({ uid: userId });
         const userProfile = {
           socketId: socket.id,
           userId,
-          displayName: joiningUser?.displayName || 'Demo User',
-          photoURL: joiningUser?.photoURL || ''
+          displayName: displayName || 'Demo User',
+          photoURL: photoURL || ''
         };
 
         // Send existing participants list to new user

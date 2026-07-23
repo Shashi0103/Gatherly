@@ -9,6 +9,7 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   // Fetch Message History
   useEffect(() => {
@@ -32,12 +33,35 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
   // Combine historical messages with real-time room updates
   const allMessages = [...history, ...messages.filter(m => !history.some(h => h._id === m._id))];
 
-  // Auto Scroll
+  // Auto Scroll logic when messages update
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+    const container = chatContainerRef.current;
+    if (!container) return;
+
+    // Check if user is near the bottom (within 120px)
+    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 120;
+    
+    // Check if the latest message was sent by the local user
+    const latestMsg = allMessages[allMessages.length - 1];
+    const isOwnMessage = latestMsg?.senderId === userId;
+
+    if (isNearBottom || isOwnMessage) {
+      if (scrollRef.current) {
+        scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
     }
-  }, [allMessages]);
+  }, [allMessages, userId]);
+
+  // Instantly scroll to bottom when drawer opens
+  useEffect(() => {
+    if (isOpen && scrollRef.current) {
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollIntoView({ behavior: 'auto' });
+        }
+      }, 100);
+    }
+  }, [isOpen]);
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -98,7 +122,7 @@ export default function ChatDrawer({ isOpen, onClose, roomId, messages, onSendMe
       </div>
 
       {/* Messages Window */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
+      <div ref={chatContainerRef} className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
         {loading ? (
           <div className="text-center text-textCol-muted text-xs py-8">
             Loading message logs...
