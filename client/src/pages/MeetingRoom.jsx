@@ -616,9 +616,9 @@ export default function MeetingRoom() {
       </AnimatePresence>
       
       {/* Top Header Row */}
-      <header className="z-10 flex items-center justify-between px-4 py-3 glass-panel !bg-surface-glass !rounded-xl">
-        <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
-          <h2 className="font-bold text-textCol-primary text-md line-clamp-1">{meetingTitle}</h2>
+      <header className="z-10 flex items-center justify-between px-3 py-2 md:px-4 md:py-3 glass-panel !bg-surface-glass !rounded-xl">
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap sm:flex-nowrap">
+          <h2 className="font-bold text-textCol-primary text-sm md:text-md line-clamp-1">{meetingTitle}</h2>
           <span className="w-1.5 h-1.5 rounded-full bg-borderCol hidden sm:inline-block"></span>
           
           <div className="flex items-center gap-3">
