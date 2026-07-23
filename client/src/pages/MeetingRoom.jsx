@@ -1124,10 +1124,18 @@ export default function MeetingRoom() {
               playsInline
               ref={(el) => {
                 if (el && peer.stream) {
-                  if (el.srcObject !== peer.stream) {
-                    el.srcObject = peer.stream;
+                  const audioTracks = peer.stream.getAudioTracks();
+                  if (audioTracks.length > 0) {
+                    const activeTrack = audioTracks[0];
+                    const currentStream = el.srcObject;
+                    const hasTrack = currentStream && currentStream.getAudioTracks().some(t => t.id === activeTrack.id);
+                    
+                    if (!hasTrack) {
+                      const audioStream = new MediaStream([activeTrack]);
+                      el.srcObject = audioStream;
+                      el.play().catch(() => {});
+                    }
                   }
-                  el.play().catch(() => {});
                 }
               }}
             />
