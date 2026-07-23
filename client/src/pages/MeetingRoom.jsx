@@ -444,8 +444,47 @@ export default function MeetingRoom() {
         stopRecording();
       }
     }
-    navigate('/dashboard');
+    navigate('/dashboard', { replace: true });
   };
+
+  // Prevent leaving the meeting via browser back/forward buttons or tab close
+  const handleLeaveRef = useRef(handleLeave);
+  useEffect(() => {
+    handleLeaveRef.current = handleLeave;
+  }, [handleLeave]);
+
+  useEffect(() => {
+    // 1. Intercept browser back/forward button clicks
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+      const confirmLeave = window.confirm(
+        "Do you want to exit the meeting? Please click the 'Leave Call' button to exit cleanly."
+      );
+      
+      if (confirmLeave) {
+        handleLeaveRef.current();
+      } else {
+        // Push state again to block next back navigation
+        window.history.pushState(null, '', window.location.href);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    // 2. Intercept tab close / window reloads
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "Are you sure you want to leave the meeting?";
+      return e.returnValue;
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   const formatTime = (secs) => {
     const m = Math.floor(secs / 60).toString().padStart(2, '0');
@@ -562,7 +601,7 @@ export default function MeetingRoom() {
 
       {/* Dynamic Video Feeds Layout */}
       <div className={`flex-1 flex min-h-0 w-full justify-center items-center overflow-hidden relative ${
-        isMobile && !pinnedUser ? 'p-0' : 'p-6'
+        isMobile && !pinnedUser ? 'pb-20' : 'pb-24 md:pb-28 pt-4 px-6'
       }`}>
         {!pinnedUser ? (
           totalParticipants <= 4 ? (
@@ -840,7 +879,7 @@ export default function MeetingRoom() {
         )}
 
         {/* Floating Control Bar Overlayed */}
-        <footer className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center">
+        <footer className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center">
           <div className="flex items-center justify-center gap-2 md:gap-4">
             {/* Mic Toggle Button */}
             <button
