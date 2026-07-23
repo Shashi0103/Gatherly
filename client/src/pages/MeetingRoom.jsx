@@ -927,7 +927,9 @@ export default function MeetingRoom() {
         )}
 
         {/* Floating Control Bar Overlayed */}
-        <footer className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center">
+        <footer className={`absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center transition-all duration-300 ${
+          isChatOpen ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100'
+        }`}>
           <div className="flex items-center justify-center gap-2 md:gap-4">
             {/* Mic Toggle Button */}
             <button
