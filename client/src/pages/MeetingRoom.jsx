@@ -1115,7 +1115,7 @@ export default function MeetingRoom() {
         )}
       </AnimatePresence>
       {/* Dedicated audio feeds for remote participants */}
-      <div className="hidden">
+      <div className="absolute w-0 h-0 opacity-0 pointer-events-none overflow-hidden">
         {Object.keys(remoteStreams).map((socketId) => {
           const peer = remoteStreams[socketId];
           return peer.stream ? (
