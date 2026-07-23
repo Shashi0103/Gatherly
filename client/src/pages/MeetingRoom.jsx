@@ -283,6 +283,22 @@ export default function MeetingRoom() {
 
   // Fetch meeting metadata first
   useEffect(() => {
+    const isAuthenticJoin = sessionStorage.getItem('joining-room-' + roomId) === 'true';
+    const hasLeftBefore = sessionStorage.getItem('left-meeting-' + roomId) === 'true';
+
+    // Clear the joining flag immediately
+    sessionStorage.removeItem('joining-room-' + roomId);
+
+    if (hasLeftBefore && !isAuthenticJoin) {
+      alert("You have left this meeting. Please enter the code or link from the dashboard to join again.");
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+
+    if (isAuthenticJoin) {
+      sessionStorage.removeItem('left-meeting-' + roomId);
+    }
+
     let timeoutId;
     const checkMeeting = async () => {
       try {
@@ -444,6 +460,7 @@ export default function MeetingRoom() {
         stopRecording();
       }
     }
+    sessionStorage.setItem('left-meeting-' + roomId, 'true');
     navigate('/dashboard', { replace: true });
   };
 
@@ -601,7 +618,7 @@ export default function MeetingRoom() {
 
       {/* Dynamic Video Feeds Layout */}
       <div className={`flex-1 flex min-h-0 w-full justify-center items-center overflow-hidden relative ${
-        isMobile && !pinnedUser ? 'pb-20' : 'pb-24 md:pb-28 pt-4 px-6'
+        isMobile && !pinnedUser ? 'p-0' : 'p-6'
       }`}>
         {!pinnedUser ? (
           totalParticipants <= 4 ? (

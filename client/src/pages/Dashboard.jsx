@@ -109,6 +109,7 @@ export default function Dashboard() {
 
       const [_, response] = await Promise.all([delayPromise, createPromise]);
       const meeting = response.data;
+      sessionStorage.setItem('joining-room-' + meeting.meetingLink, 'true');
       navigate(`/meet/${meeting.meetingLink}`);
     } catch (err) {
       console.error('Error creating instant meeting:', err);
@@ -126,6 +127,7 @@ export default function Dashboard() {
       code = code.split('/meet/')[1];
     }
     
+    sessionStorage.setItem('joining-room-' + code, 'true');
     navigate(`/meet/${code}`);
   };
 
@@ -355,7 +357,10 @@ export default function Dashboard() {
                         )}
 
                         <button
-                          onClick={() => navigate(`/meet/${meet.meetingLink}`)}
+                          onClick={() => {
+                            sessionStorage.setItem('joining-room-' + meet.meetingLink, 'true');
+                            navigate(`/meet/${meet.meetingLink}`);
+                          }}
                           className="btn-secondary !py-2 !px-4 text-xs font-semibold flex items-center gap-1.5"
                         >
                           <Play className="w-3.5 h-3.5 fill-white text-white" /> Start
