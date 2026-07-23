@@ -407,16 +407,30 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError, ph
 
     // Received Remote Stream
     pc.ontrack = (e) => {
-      console.log(`Received remote track from peer ${socketId}`);
-      const remoteStream = e.streams[0];
+      console.log(`Received remote track (${e.track.kind}) from peer ${socketId}`);
       
       setRemoteStreams((prev) => {
         const existing = prev[socketId] || {};
+        let currentStream = existing.stream;
+        
+        if (!currentStream) {
+          currentStream = new MediaStream();
+        }
+        
+        // Add track if not already present
+        const currentTracks = currentStream.getTracks();
+        if (!currentTracks.some(t => t.id === e.track.id)) {
+          currentStream.addTrack(e.track);
+        }
+        
+        // Clone stream to force JavaScript reference change and trigger React updates
+        const clonedStream = new MediaStream(currentStream.getTracks());
+        
         return {
           ...prev,
           [socketId]: {
             ...existing,
-            stream: remoteStream,
+            stream: clonedStream,
             displayName: existing.displayName || peerName,
             connectionStatus: existing.connectionStatus || 'stable'
           },
@@ -424,7 +438,7 @@ export const useWebRTC = (roomId, userId, displayName, onUserJoined, onError, ph
       });
 
       // Start Remote Speech Detection
-      setupRemoteSpeechDetection(socketId, remoteStream);
+      setupRemoteSpeechDetection(socketId, e.streams[0] || new MediaStream([e.track]));
     };
 
     pc.onconnectionstatechange = () => {
