@@ -355,6 +355,24 @@ export default function MeetingRoom() {
     };
   }, []);
 
+  // Global listener to unlock HTML5 audio autoplay blocks on mobile browsers
+  useEffect(() => {
+    const resumeAutoplay = () => {
+      const audioElements = document.querySelectorAll('audio');
+      audioElements.forEach((audio) => {
+        if (audio.paused) {
+          audio.play().catch(() => {});
+        }
+      });
+    };
+    window.addEventListener('click', resumeAutoplay);
+    window.addEventListener('touchstart', resumeAutoplay);
+    return () => {
+      window.removeEventListener('click', resumeAutoplay);
+      window.removeEventListener('touchstart', resumeAutoplay);
+    };
+  }, [remoteStreams]);
+
   // Auto-pin screen sharing
   const wasAutoPinnedRef = useRef(null); // Stores the socketId/key of the auto-pinned user
   useEffect(() => {
@@ -603,18 +621,6 @@ export default function MeetingRoom() {
           <span className="w-1.5 h-1.5 rounded-full bg-borderCol hidden sm:inline-block"></span>
           
           <div className="flex items-center gap-3">
-            {/* Invitation URL Copy Section */}
-            <div className="flex items-center gap-1.5 bg-black/35 border border-white/10 px-2.5 py-1 rounded-lg text-xs">
-              <span className="text-textCol-secondary font-medium">Link</span>
-              <button 
-                onClick={handleCopyLink} 
-                className="p-1 rounded hover:bg-white/10 text-textCol-secondary hover:text-textCol-primary transition-colors cursor-pointer"
-                title="Copy Invitation Link"
-              >
-                {copiedLink ? <Check className="w-3.5 h-3.5 text-greenAccent" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
-            </div>
-
             {/* Meeting Code Copy Section */}
             <div className="flex items-center gap-1.5 bg-black/35 border border-white/10 px-2.5 py-1 rounded-lg text-xs">
               <span className="text-textCol-muted font-mono lowercase select-all">{roomId?.toLowerCase()}</span>
@@ -1115,8 +1121,11 @@ export default function MeetingRoom() {
               autoPlay
               playsInline
               ref={(el) => {
-                if (el && peer.stream && el.srcObject !== peer.stream) {
-                  el.srcObject = peer.stream;
+                if (el && peer.stream) {
+                  if (el.srcObject !== peer.stream) {
+                    el.srcObject = peer.stream;
+                  }
+                  el.play().catch(() => {});
                 }
               }}
             />

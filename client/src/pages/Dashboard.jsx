@@ -146,13 +146,20 @@ export default function Dashboard() {
     }
   };
 
-  const [copiedMeetingId, setCopiedMeetingId] = useState(null);
+  const [copiedLinkId, setCopiedLinkId] = useState(null);
+  const [copiedCodeId, setCopiedCodeId] = useState(null);
 
-  const copyToClipboard = (linkCode, meetingId) => {
+  const copyLinkToClipboard = (linkCode, meetingId) => {
     const fullUrl = `${window.location.origin}/meet/${linkCode}`;
     navigator.clipboard.writeText(fullUrl);
-    setCopiedMeetingId(meetingId);
-    setTimeout(() => setCopiedMeetingId(null), 2000);
+    setCopiedLinkId(meetingId);
+    setTimeout(() => setCopiedLinkId(null), 2000);
+  };
+
+  const copyCodeToClipboard = (linkCode, meetingId) => {
+    navigator.clipboard.writeText(linkCode.toLowerCase());
+    setCopiedCodeId(meetingId);
+    setTimeout(() => setCopiedCodeId(null), 2000);
   };
 
   const getGreeting = () => {
@@ -326,22 +333,44 @@ export default function Dashboard() {
                       </div>
 
                       <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end border-t sm:border-none border-borderCol pt-3 sm:pt-0">
+                        {/* Copy Meeting Code Button */}
                         <button
-                          onClick={() => copyToClipboard(meet.meetingLink, meet._id)}
+                          onClick={() => copyCodeToClipboard(meet.meetingLink, meet._id)}
                           className={`p-2.5 rounded-xl border transition-all text-xs flex items-center gap-1.5 ${
-                            copiedMeetingId === meet._id
+                            copiedCodeId === meet._id
                               ? 'bg-blueAccent/15 border-blueAccent text-blue-300'
                               : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
                           }`}
-                          title="Copy Link"
+                          title="Copy Meeting Code"
                         >
-                          {copiedMeetingId === meet._id ? (
+                          {copiedCodeId === meet._id ? (
                             <>
-                              <Check className="w-4 h-4 text-blue-300" /> Copied
+                              <Check className="w-4 h-4 text-blue-300" /> Code Copied
                             </>
                           ) : (
                             <>
-                              <LinkIcon className="w-4 h-4" /> Copy
+                              <Copy className="w-4 h-4" /> Copy Code
+                            </>
+                          )}
+                        </button>
+
+                        {/* Copy Meeting Link Button */}
+                        <button
+                          onClick={() => copyLinkToClipboard(meet.meetingLink, meet._id)}
+                          className={`p-2.5 rounded-xl border transition-all text-xs flex items-center gap-1.5 ${
+                            copiedLinkId === meet._id
+                              ? 'bg-blueAccent/15 border-blueAccent text-blue-300'
+                              : 'bg-surface-glass border-borderCol hover:border-blueAccent/25 text-textCol-secondary hover:text-textCol-primary'
+                          }`}
+                          title="Copy Invitation Link"
+                        >
+                          {copiedLinkId === meet._id ? (
+                            <>
+                              <Check className="w-4 h-4 text-blue-300" /> Link Copied
+                            </>
+                          ) : (
+                            <>
+                              <LinkIcon className="w-4 h-4" /> Copy Link
                             </>
                           )}
                         </button>
